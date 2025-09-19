@@ -1,0 +1,561 @@
+/**
+ * Internet Speed Test - Stylesheet
+ * 
+ * Organized CSS for the continuous speed test application
+ * Includes: responsive design, accessibility features, and modern styling
+ */
+
+/* ============================================================================
+   RESET AND BASE STYLES
+   ============================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ============================================================================
+   ACCESSIBILITY UTILITIES
+   ============================================================================ */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus indicators for better accessibility */
+button:focus,
+select:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* ============================================================================
+   HEADER SECTION
+   ============================================================================ */
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+.test-info {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 16px;
+    backdrop-filter: blur(10px);
+}
+
+.test-info small {
+    font-size: 0.85em;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* ============================================================================
+   MAIN CONTENT CONTAINER
+   ============================================================================ */
+
+main {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   CONTROL SECTION - Test configuration and start/stop controls
+   ============================================================================ */
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+/* Primary action button */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary.stop {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+}
+
+/* Test configuration controls */
+.test-settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.test-settings label {
+    font-weight: 600;
+    color: #555;
+}
+
+.test-settings select {
+    padding: 8px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.test-settings select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* ============================================================================
+   SPEED METRICS SECTION - Real-time speed measurement display
+   ============================================================================ */
+
+.speed-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+/* Individual speed measurement cards */
+.speed-card {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.speed-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.speed-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.speed-card:not([style*="display: none"]) {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Download speed card styling */
+.speed-card.download {
+    background: linear-gradient(135deg, #f8fff8, #e8f5e8);
+}
+
+.speed-card.download::before {
+    background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+/* Upload speed card styling */
+.speed-card.upload {
+    background: linear-gradient(135deg, #fff8f8, #ffeaea);
+}
+
+.speed-card.upload::before {
+    background: linear-gradient(90deg, #fd7e14, #e83e8c);
+}
+
+/* Ping latency card styling */
+.speed-card.ping {
+    background: linear-gradient(135deg, #f8f8ff, #eaeaff);
+}
+
+.speed-card.ping::before {
+    background: linear-gradient(90deg, #6f42c1, #007bff);
+}
+
+/* Speed card icon styling */
+.speed-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+/* Speed card content structure */
+.speed-info h3 {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.speed-value {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.speed-unit {
+    color: #666;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   TEST STATUS SECTION - Progress indicators and test state
+   ============================================================================ */
+
+.test-status {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Status information display */
+.status-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* Progress bar visualization */
+.progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Progress bar animation effect */
+.progress-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* ============================================================================
+   GRAPH VISUALIZATION SECTION - Real-time speed data charts
+   ============================================================================ */
+
+.graph-container {
+    margin-bottom: 30px;
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+/* Graph section title */
+.graph-container h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Graph control toggles */
+.graph-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+/* Individual toggle buttons */
+.toggle-btn {
+    padding: 8px 16px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toggle-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+.toggle-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Download speed toggle styling */
+.toggle-btn[data-type="download"].active {
+    background: #2196f3;
+    border-color: #2196f3;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Upload speed toggle styling */
+.toggle-btn[data-type="upload"].active {
+    background: #9c27b0;
+    border-color: #9c27b0;
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+}
+
+/* Canvas container for chart visualization */
+.canvas-container {
+    position: relative;
+    background: #fafafa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* Main speed graph canvas */
+#speedGraph {
+    width: 100%;
+    height: 400px;
+    max-width: 100%;
+    display: block;
+}
+
+/* Graph axis labels container */
+.graph-labels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Y-axis label styling */
+.y-axis-label {
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: rotate(-90deg) translateY(50%);
+    transform-origin: left center;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+}
+
+/* X-axis label styling */
+.x-axis-label {
+    position: absolute;
+    bottom: 5px;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Statistics */
+.statistics h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.stat-item label {
+    font-weight: 600;
+    color: #555;
+}
+
+.stat-item span {
+    font-weight: bold;
+    color: #333;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN - Mobile and tablet optimizations
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    main {
+        padding: 20px;
+    }
+    
+    /* Header adjustments for mobile */
+    header h1 {
+        font-size: 2em;
+    }
+    
+    /* Control layout for smaller screens */
+    .controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    /* Single column layout for speed cards */
+    .speed-display {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Stack status information vertically */
+    .status-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    /* Single column for statistics */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Reduce graph height on mobile */
+    #speedGraph {
+        height: 300px;
+    }
+}
+
+/* ============================================================================
+   ANIMATION CLASSES - Interactive feedback and state indicators
+   ============================================================================ */
+
+/* Testing state animation */
+.testing {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Error state styling */
+.error {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2) !important;
+    color: #c62828 !important;
+    border-color: #ef5350 !important;
+}
+
+/* Success state styling */
+.success {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9) !important;
+    color: #2e7d32 !important;
+    border-color: #66bb6a !important;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+/* Fade in animation for new content */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}

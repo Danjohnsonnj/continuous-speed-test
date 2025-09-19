@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Real-time internet speed test with continuous monitoring using Cloudflare, HTTPBin, and major CDN infrastructure">
+  <title>Continuous Speed Test - Real-time Internet Speed Monitor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Page Header with App Information -->
+    <header role="banner">
+      <h1>Internet Speed Test</h1>
+      <p>Real-world connection monitoring with multiple CDN infrastructure</p>
+      <div class="test-info" role="complementary">
+        <small aria-label="Technical details">
+          ✓ Uses Cloudflare, Google, and jsDelivr CDNs for download tests |
+          ✓ HTTPBin for upload testing |
+          ✓ Multi-endpoint ping measurement
+        </small>
+      </div>
+    </header>
+
+    <!-- Main Application Content -->
+    <main role="main">
+      <!-- Test Configuration Controls -->
+      <section class="controls" aria-labelledby="controls-heading">
+        <h2 id="controls-heading" class="visually-hidden">Test Controls</h2>
+
+        <button id="startStopBtn" class="btn-primary" aria-describedby="test-status" type="button">
+          Start Test
+        </button>
+
+        <div class="test-settings">
+          <label for="testType">Test Type:</label>
+          <select id="testType" aria-describedby="test-type-help">
+            <option value="both" selected>Download &amp; Upload</option>
+            <option value="download">Download Only</option>
+            <option value="upload">Upload Only</option>
+          </select>
+          <span id="test-type-help" class="visually-hidden">
+            Choose what aspects of your connection to test
+          </span>
+        </div>
+
+        <div class="test-settings">
+          <label for="testDuration">Test Duration:</label>
+          <select id="testDuration" aria-describedby="duration-help">
+            <option value="30">30 seconds</option>
+            <option value="60" selected>1 minute</option>
+            <option value="120">2 minutes</option>
+            <option value="300">5 minutes</option>
+            <option value="600">10 minutes</option>
+            <option value="0">Continuous</option>
+          </select>
+          <span id="duration-help" class="visually-hidden">
+            How long to run the speed test
+          </span>
+        </div>
+      </section>
+
+      <!-- Real-time Speed Metrics Display -->
+      <section class="speed-display" aria-labelledby="speed-heading">
+        <h2 id="speed-heading" class="visually-hidden">Current Speed Measurements</h2>
+
+        <div class="speed-card download" role="img" aria-labelledby="download-label">
+          <div class="speed-icon" aria-hidden="true">↓</div>
+          <div class="speed-info">
+            <h3 id="download-label">Download</h3>
+            <div class="speed-value" id="downloadSpeed" aria-live="polite">--</div>
+            <div class="speed-unit">Mbps</div>
+          </div>
+        </div>
+
+        <div class="speed-card upload" role="img" aria-labelledby="upload-label">
+          <div class="speed-icon" aria-hidden="true">↑</div>
+          <div class="speed-info">
+            <h3 id="upload-label">Upload</h3>
+            <div class="speed-value" id="uploadSpeed" aria-live="polite">--</div>
+            <div class="speed-unit">Mbps</div>
+          </div>
+        </div>
+
+        <div class="speed-card ping" role="img" aria-labelledby="ping-label">
+          <div class="speed-icon" aria-hidden="true">⚡</div>
+          <div class="speed-info">
+            <h3 id="ping-label">Ping</h3>
+            <div class="speed-value" id="pingValue" aria-live="polite">--</div>
+            <div class="speed-unit">ms</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Test Progress and Status -->
+      <section class="test-status" aria-labelledby="status-heading">
+        <h2 id="status-heading" class="visually-hidden">Test Status and Progress</h2>
+
+        <div class="status-info">
+          <span id="testStatus" aria-live="polite">Ready to test</span>
+          <span id="testProgress" aria-live="polite"></span>
+        </div>
+
+        <div class="progress-bar" role="progressbar" aria-labelledby="status-heading">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </section>
+
+      <!-- Speed Visualization Graph -->
+      <section class="graph-container" aria-labelledby="graph-heading">
+        <h2 id="graph-heading">Speed Over Time</h2>
+
+        <div class="graph-controls" role="group" aria-labelledby="graph-controls-heading">
+          <h3 id="graph-controls-heading" class="visually-hidden">Graph Display Options</h3>
+          <button id="toggleDownload" class="toggle-btn active" data-type="download" aria-pressed="true" type="button">
+            Download
+          </button>
+          <button id="toggleUpload" class="toggle-btn active" data-type="upload" aria-pressed="true" type="button">
+            Upload
+          </button>
+        </div>
+
+        <div class="canvas-container">
+          <canvas id="speedGraph" width="800" height="400" role="img" aria-labelledby="graph-heading"
+            aria-describedby="graph-description">
+          </canvas>
+          <p id="graph-description" class="visually-hidden">
+            A real-time graph showing internet speed measurements over time
+          </p>
+
+          <div class="graph-labels" aria-hidden="true">
+            <div class="y-axis-label">Speed (Mbps)</div>
+            <div class="x-axis-label">Time</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Statistical Summary -->
+      <section class="statistics" aria-labelledby="stats-heading">
+        <h2 id="stats-heading">Connection Statistics</h2>
+
+        <div class="stats-grid" role="list" aria-labelledby="stats-heading">
+          <div class="stat-item" role="listitem">
+            <label>Avg Download:</label>
+            <span id="avgDownload" aria-live="polite">-- Mbps</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Max Download:</label>
+            <span id="maxDownload" aria-live="polite">-- Mbps</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Min Download:</label>
+            <span id="minDownload" aria-live="polite">-- Mbps</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Avg Upload:</label>
+            <span id="avgUpload" aria-live="polite">-- Mbps</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Max Upload:</label>
+            <span id="maxUpload" aria-live="polite">-- Mbps</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Min Upload:</label>
+            <span id="minUpload" aria-live="polite">-- Mbps</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Stability:</label>
+            <span id="stability" aria-live="polite">-- %</span>
+          </div>
+          <div class="stat-item" role="listitem">
+            <label>Test Duration:</label>
+            <span id="actualDuration" aria-live="polite">-- s</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
