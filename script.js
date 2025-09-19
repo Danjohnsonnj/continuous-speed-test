@@ -85,8 +85,14 @@ class SpeedTest {
         ],
       },
       upload: {
+        // Use multiple endpoints optimized for upload testing
         primary: "https://httpbin.org/post",
-        fallbacks: ["https://speed.cloudflare.com/__up"],
+        fallbacks: [
+          "https://postman-echo.com/post",
+          "https://jsonplaceholder.typicode.com/posts",
+        ],
+        // Add Cloudflare upload endpoint if available
+        cloudflare: "https://speed.cloudflare.com/__up",
       },
       ping: [
         "https://www.google.com/favicon.ico",
@@ -111,11 +117,12 @@ class SpeedTest {
         25 * 1024 * 1024, // 25MB
         50 * 1024 * 1024, // 50MB
       ],
-      // Progressive upload sizes for better bandwidth utilization
+      // Progressive upload sizes for better bandwidth utilization - larger sizes
       uploadSizes: [
-        1024 * 1024, // 1MB
-        5 * 1024 * 1024, // 5MB
-        10 * 1024 * 1024, // 10MB
+        10 * 1024 * 1024, // 10MB - start larger to match commercial tests
+        20 * 1024 * 1024, // 20MB
+        35 * 1024 * 1024, // 35MB
+        50 * 1024 * 1024, // 50MB - match download max
       ],
       currentSizeIndex: 0,
       measurementInterval: 3000, // 3 seconds between measurements (longer for TCP optimization)
@@ -992,12 +999,19 @@ class SpeedTest {
       ];
 
     try {
-      // Try httpbin.org first (accepts POST data)
-      let result = await this.testUploadWithHttpbin(testSize);
+      // For larger files, use parallel uploads like downloads
+      const useParallel = testSize >= 20 * 1024 * 1024; // 20MB or larger
+
+      let result;
+      if (useParallel) {
+        result = await this.testUploadWithParallelConnections(testSize);
+      } else {
+        result = await this.testUploadWithHttpbin(testSize);
+      }
 
       if (result === null) {
-        // Try alternative upload method
-        result = await this.testUploadWithFormData(testSize);
+        // Try alternative upload endpoints
+        result = await this.testUploadWithAlternativeEndpoints(testSize);
       }
 
       if (result === null) {
@@ -1022,37 +1036,176 @@ class SpeedTest {
     }
   }
 
+  async testUploadWithParallelConnections(totalBytes) {
+    try {
+      const chunkCount = 4; // Use 4 parallel connections like downloads
+      const chunkSize = Math.floor(totalBytes / chunkCount);
+      const uploadChunks = [];
+
+      // Create upload chunks with test data
+      for (let i = 0; i < chunkCount; i++) {
+        const isLastChunk = i === chunkCount - 1;
+        const currentChunkSize = isLastChunk
+          ? totalBytes - chunkSize * i // Handle remainder in last chunk
+          : chunkSize;
+
+        uploadChunks.push({
+          data: this.generateTestData(currentChunkSize),
+          size: currentChunkSize,
+        });
+      }
+
+      // Start parallel uploads
+      const startTime = performance.now();
+
+      const uploadPromises = uploadChunks.map(async (chunk, index) => {
+        try {
+          const response = await fetch("https://httpbin.org/post", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/octet-stream",
+              "X-Chunk-Index": index.toString(),
+            },
+            body: chunk.data,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Chunk ${index} failed: HTTP ${response.status}`);
+          }
+
+          return { success: true, size: chunk.size };
+        } catch (error) {
+          console.warn(`Upload chunk ${index} failed:`, error);
+          return { success: false, size: chunk.size };
+        }
+      });
+
+      const results = await Promise.allSettled(uploadPromises);
+      const endTime = performance.now();
+
+      // Calculate total successful bytes uploaded
+      let successfulBytes = 0;
+      let successfulUploads = 0;
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled" && result.value.success) {
+          successfulBytes += result.value.size;
+          successfulUploads++;
+        }
+      });
+
+      // Need at least 2 successful uploads for valid measurement
+      if (successfulUploads < 2) {
+        console.warn(
+          `Only ${successfulUploads} uploads succeeded, insufficient for measurement`
+        );
+        return null;
+      }
+
+      const durationMs = endTime - startTime;
+      const speedMbps = this.calculateSpeed(successfulBytes, durationMs);
+
+      console.log(
+        `Parallel upload: ${successfulBytes} bytes in ${durationMs.toFixed(
+          0
+        )}ms = ${speedMbps.toFixed(2)} Mbps`
+      );
+      return speedMbps;
+    } catch (error) {
+      console.error("Parallel upload error:", error);
+      return null;
+    }
+  }
+
+  async testUploadWithAlternativeEndpoints(bytes) {
+    const endpoints = [
+      {
+        url: "https://postman-echo.com/post",
+        name: "Postman Echo",
+        headers: { "Content-Type": "application/octet-stream" },
+      },
+      {
+        url: "https://jsonplaceholder.typicode.com/posts",
+        name: "JSONPlaceholder",
+        headers: { "Content-Type": "application/json" },
+      },
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying upload to ${endpoint.name}...`);
+        const testData =
+          endpoint.name === "JSONPlaceholder"
+            ? JSON.stringify({ data: this.generateTestData(bytes).toString() })
+            : this.generateTestData(bytes);
+
+        const startTime = performance.now();
+
+        const response = await fetch(endpoint.url, {
+          method: "POST",
+          headers: endpoint.headers,
+          body: testData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const endTime = performance.now();
+        const durationMs = endTime - startTime;
+        const speedMbps = this.calculateSpeed(bytes, durationMs);
+
+        console.log(
+          `${endpoint.name} upload: ${bytes} bytes in ${durationMs.toFixed(
+            0
+          )}ms = ${speedMbps.toFixed(2)} Mbps`
+        );
+        return speedMbps;
+      } catch (error) {
+        console.warn(`${endpoint.name} upload failed:`, error);
+        continue;
+      }
+    }
+
+    return null;
+  }
+
   async testUploadWithHttpbin(bytes) {
     try {
       const testData = this.generateTestData(bytes);
 
-      // Start timing just before the upload begins
+      // More precise timing - measure only the actual upload
       const startTime = performance.now();
 
       const response = await fetch("https://httpbin.org/post", {
         method: "POST",
         headers: {
           "Content-Type": "application/octet-stream",
+          "Content-Length": bytes.toString(),
         },
         body: testData,
       });
+
+      // Stop timing as soon as response headers are received
+      const endTime = performance.now();
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      // End timing when upload completes, before processing response
-      const endTime = performance.now();
+      // Calculate using precise measurements
+      const durationMs = endTime - startTime;
+      const speedMbps = this.calculateSpeed(bytes, durationMs);
 
-      // Don't include response parsing time in measurement
-      await response.json();
+      console.log(
+        `HTTPBin upload: ${bytes} bytes in ${durationMs.toFixed(
+          0
+        )}ms = ${speedMbps.toFixed(2)} Mbps`
+      );
 
-      const duration = (endTime - startTime) / 1000;
-      const mbps = (bytes * 8) / (duration * 1000000);
-
-      // Validate reasonable result (uploads typically slower than downloads)
-      if (mbps > 0 && mbps < 1000) {
-        return mbps;
+      // Validate reasonable result (uploads typically 10-80% of download speed)
+      if (speedMbps > 0 && speedMbps < 1000) {
+        return speedMbps;
       }
 
       return null;
@@ -1078,18 +1231,24 @@ class SpeedTest {
         },
       });
 
+      const endTime = performance.now();
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      await response.json();
-      const endTime = performance.now();
+      // Calculate using precise measurements
+      const durationMs = endTime - startTime;
+      const speedMbps = this.calculateSpeed(bytes, durationMs);
 
-      const duration = (endTime - startTime) / 1000;
-      const mbps = (bytes * 8) / (duration * 1000000);
+      console.log(
+        `FormData upload: ${bytes} bytes in ${durationMs.toFixed(
+          0
+        )}ms = ${speedMbps.toFixed(2)} Mbps`
+      );
 
-      if (mbps > 0 && mbps < 1000) {
-        return mbps;
+      if (speedMbps > 0 && speedMbps < 1000) {
+        return speedMbps;
       }
 
       return null;
@@ -1100,12 +1259,43 @@ class SpeedTest {
   }
 
   generateTestData(size) {
-    // Generate random test data
+    // For large uploads, use a more efficient pattern-based approach
+    if (size > 10 * 1024 * 1024) {
+      // 10MB+
+      return this.generateLargeTestData(size);
+    }
+
+    // For smaller uploads, use random data for better accuracy
     const data = new Uint8Array(size);
     for (let i = 0; i < size; i++) {
       data[i] = Math.floor(Math.random() * 256);
     }
     return data;
+  }
+
+  generateLargeTestData(size) {
+    // Create a repeating pattern for efficiency with large files
+    const patternSize = 1024; // 1KB pattern
+    const pattern = new Uint8Array(patternSize);
+
+    // Fill pattern with semi-random but predictable data
+    for (let i = 0; i < patternSize; i++) {
+      pattern[i] = (i * 137 + 71) % 256; // Simple pseudo-random sequence
+    }
+
+    const data = new Uint8Array(size);
+    for (let i = 0; i < size; i++) {
+      data[i] = pattern[i % patternSize];
+    }
+
+    return data;
+  }
+
+  calculateSpeed(bytes, durationMs) {
+    // Convert to Mbps: (bytes * 8 bits/byte) / (duration in seconds * 1,000,000 bits/Mbps)
+    const durationSeconds = durationMs / 1000;
+    const speedMbps = (bytes * 8) / (durationSeconds * 1000000);
+    return speedMbps;
   }
 
   simulateNetworkSpeed(type) {
