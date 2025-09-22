@@ -178,6 +178,9 @@ class SpeedTest {
         avgUpload: document.getElementById("avgUpload"),
         maxUpload: document.getElementById("maxUpload"),
         minUpload: document.getElementById("minUpload"),
+        p98Download: document.getElementById("p98Download"),
+        p98Upload: document.getElementById("p98Upload"),
+        p98Ping: document.getElementById("p98Ping"),
         stability: document.getElementById("stability"),
         actualDuration: document.getElementById("actualDuration"),
       },
@@ -1704,6 +1707,7 @@ class SpeedTest {
     ) {
       const stats = this.calculateWarmedUpStats(this.measurementData.download);
       const warmedUpData = this.getWarmedUpData(this.measurementData.download);
+      const p98Download = this.calculate98thPercentile(this.measurementData.download);
       
       if (warmedUpData.length > 0) {
         document.getElementById("avgDownload").textContent =
@@ -1712,16 +1716,20 @@ class SpeedTest {
           stats.max.toFixed(1) + " Mbps";
         document.getElementById("minDownload").textContent =
           stats.min.toFixed(1) + " Mbps";
+        document.getElementById("p98Download").textContent =
+          p98Download.toFixed(1) + " Mbps";
       } else {
         // Still warming up
         document.getElementById("avgDownload").textContent = "Warming up...";
         document.getElementById("maxDownload").textContent = "Warming up...";
         document.getElementById("minDownload").textContent = "Warming up...";
+        document.getElementById("p98Download").textContent = "Warming up...";
       }
     } else {
       document.getElementById("avgDownload").textContent = "-- Mbps";
       document.getElementById("maxDownload").textContent = "-- Mbps";
       document.getElementById("minDownload").textContent = "-- Mbps";
+      document.getElementById("p98Download").textContent = "-- Mbps";
     }
 
     // Upload statistics (using warmed-up data)
@@ -1731,6 +1739,7 @@ class SpeedTest {
     ) {
       const stats = this.calculateWarmedUpStats(this.measurementData.upload);
       const warmedUpData = this.getWarmedUpData(this.measurementData.upload);
+      const p98Upload = this.calculate98thPercentile(this.measurementData.upload);
       
       if (warmedUpData.length > 0) {
         document.getElementById("avgUpload").textContent =
@@ -1739,19 +1748,23 @@ class SpeedTest {
           stats.max.toFixed(1) + " Mbps";
         document.getElementById("minUpload").textContent =
           stats.min.toFixed(1) + " Mbps";
+        document.getElementById("p98Upload").textContent =
+          p98Upload.toFixed(1) + " Mbps";
       } else {
         // Still warming up
         document.getElementById("avgUpload").textContent = "Warming up...";
         document.getElementById("maxUpload").textContent = "Warming up...";
         document.getElementById("minUpload").textContent = "Warming up...";
+        document.getElementById("p98Upload").textContent = "Warming up...";
       }
     } else {
       document.getElementById("avgUpload").textContent = "-- Mbps";
       document.getElementById("maxUpload").textContent = "-- Mbps";
       document.getElementById("minUpload").textContent = "-- Mbps";
+      document.getElementById("p98Upload").textContent = "-- Mbps";
     }
 
-    // Stability calculation (coefficient of variation) - using warmed-up data
+    // Consistency calculation (coefficient of variation) - using warmed-up data
     let stability = 0;
     if (testType === "download" && this.measurementData.download.length > 0) {
       const warmedUpData = this.getWarmedUpData(this.measurementData.download);
@@ -1781,6 +1794,21 @@ class SpeedTest {
         const uploadCV = this.calculateCV(warmedUpUpload);
         stability = Math.max(0, 100 - (downloadCV + uploadCV) / 2);
       }
+    }
+
+    // Ping 98th percentile calculation
+    if (this.measurementData.ping.length > 0) {
+      const p98Ping = this.calculate98thPercentile(this.measurementData.ping);
+      const warmedUpPing = this.getWarmedUpData(this.measurementData.ping);
+      
+      if (warmedUpPing.length > 0) {
+        document.getElementById("p98Ping").textContent =
+          p98Ping.toFixed(1) + " ms";
+      } else {
+        document.getElementById("p98Ping").textContent = "Warming up...";
+      }
+    } else {
+      document.getElementById("p98Ping").textContent = "-- ms";
     }
 
     // Duration
@@ -1826,6 +1854,32 @@ class SpeedTest {
       max: Math.max(...warmedUpData),
       min: Math.min(...warmedUpData)
     };
+  }
+
+  /**
+   * Calculate 98th percentile by excluding top and bottom 1% of measurements
+   * @param {Array} data - Full measurement array
+   * @returns {number} 98th percentile value (average of middle 98%)
+   */
+  calculate98thPercentile(data) {
+    const warmedUpData = this.getWarmedUpData(data);
+    if (warmedUpData.length < 10) {
+      // Need at least 10 data points for meaningful percentile calculation
+      return this.calculateAverage(warmedUpData);
+    }
+    
+    // Sort data in ascending order
+    const sortedData = [...warmedUpData].sort((a, b) => a - b);
+    
+    // Calculate indices for 1% and 99% (excluding top and bottom 1%)
+    const onePercentIndex = Math.floor(sortedData.length * 0.01);
+    const ninetyNinePercentIndex = Math.ceil(sortedData.length * 0.99);
+    
+    // Extract middle 98% of data
+    const middle98Percent = sortedData.slice(onePercentIndex, ninetyNinePercentIndex);
+    
+    // Return average of the middle 98%
+    return this.calculateAverage(middle98Percent);
   }
 
   calculateCV(arr) {
@@ -1922,9 +1976,10 @@ class SpeedTest {
         avg: this.calculateAverage(this.measurementData.download).toFixed(2),
         max: Math.max(...this.measurementData.download).toFixed(2),
         min: Math.min(...this.measurementData.download).toFixed(2),
+        p98: this.calculate98thPercentile(this.measurementData.download).toFixed(2),
       };
       csv.push(
-        `# Download - Avg: ${downloadStats.avg} Mbps, Max: ${downloadStats.max} Mbps, Min: ${downloadStats.min} Mbps`
+        `# Download - Avg: ${downloadStats.avg} Mbps, Max: ${downloadStats.max} Mbps, Min: ${downloadStats.min} Mbps, 98th Percentile: ${downloadStats.p98} Mbps`
       );
     }
 
@@ -1933,9 +1988,10 @@ class SpeedTest {
         avg: this.calculateAverage(this.measurementData.upload).toFixed(2),
         max: Math.max(...this.measurementData.upload).toFixed(2),
         min: Math.min(...this.measurementData.upload).toFixed(2),
+        p98: this.calculate98thPercentile(this.measurementData.upload).toFixed(2),
       };
       csv.push(
-        `# Upload - Avg: ${uploadStats.avg} Mbps, Max: ${uploadStats.max} Mbps, Min: ${uploadStats.min} Mbps`
+        `# Upload - Avg: ${uploadStats.avg} Mbps, Max: ${uploadStats.max} Mbps, Min: ${uploadStats.min} Mbps, 98th Percentile: ${uploadStats.p98} Mbps`
       );
     }
 
@@ -1944,9 +2000,10 @@ class SpeedTest {
         avg: this.calculateAverage(this.measurementData.ping).toFixed(1),
         max: Math.max(...this.measurementData.ping).toFixed(1),
         min: Math.min(...this.measurementData.ping).toFixed(1),
+        p98: this.calculate98thPercentile(this.measurementData.ping).toFixed(1),
       };
       csv.push(
-        `# Ping - Avg: ${pingStats.avg} ms, Max: ${pingStats.max} ms, Min: ${pingStats.min} ms`
+        `# Ping - Avg: ${pingStats.avg} ms, Max: ${pingStats.max} ms, Min: ${pingStats.min} ms, 98th Percentile: ${pingStats.p98} ms`
       );
     }
 
