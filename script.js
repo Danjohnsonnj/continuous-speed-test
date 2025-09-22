@@ -163,6 +163,9 @@ class SpeedTest {
       toggleDownload: document.getElementById("toggleDownload"),
       toggleUpload: document.getElementById("toggleUpload"),
 
+      // Theme toggle
+      themeToggle: document.getElementById("themeToggle"),
+
       // Statistics
       stats: {
         avgDownload: document.getElementById("avgDownload"),
@@ -238,6 +241,16 @@ class SpeedTest {
       this.toggleGraphLine("upload", e.target);
     });
 
+    // Theme toggle control
+    if (this.domElements.themeToggle) {
+      this.domElements.themeToggle.addEventListener("click", () => {
+        this.toggleTheme();
+      });
+    }
+
+    // Initialize theme from localStorage or system preference
+    this.initializeTheme();
+
     // Initialize UI state
     this.updateUIForTestType();
   }
@@ -262,6 +275,118 @@ class SpeedTest {
     );
 
     this.drawGraph();
+  }
+
+  /**
+   * Initialize theme based on localStorage or system preference
+   */
+  initializeTheme() {
+    const savedTheme = localStorage.getItem('speed-test-theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    let theme = 'auto';
+    if (savedTheme) {
+      theme = savedTheme;
+    }
+    
+    this.applyTheme(theme, systemPrefersDark);
+    this.updateThemeToggleIcon(theme, systemPrefersDark);
+    
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      const currentTheme = localStorage.getItem('speed-test-theme') || 'auto';
+      if (currentTheme === 'auto') {
+        this.applyTheme('auto', e.matches);
+        this.updateThemeToggleIcon('auto', e.matches);
+      }
+    });
+  }
+
+  /**
+   * Toggle between light, dark, and auto themes
+   */
+  toggleTheme() {
+    const currentTheme = localStorage.getItem('speed-test-theme') || 'auto';
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark';
+        break;
+      case 'dark':
+        newTheme = 'auto';
+        break;
+      default: // 'auto'
+        newTheme = 'light';
+        break;
+    }
+    
+    localStorage.setItem('speed-test-theme', newTheme);
+    this.applyTheme(newTheme, systemPrefersDark);
+    this.updateThemeToggleIcon(newTheme, systemPrefersDark);
+    
+    // Add animation class
+    if (this.domElements.themeToggle) {
+      this.domElements.themeToggle.classList.add('animating');
+      setTimeout(() => {
+        this.domElements.themeToggle.classList.remove('animating');
+      }, 600);
+    }
+  }
+
+  /**
+   * Apply the specified theme to the document
+   * @param {string} theme - 'light', 'dark', or 'auto'
+   * @param {boolean} systemPrefersDark - Whether system prefers dark mode
+   */
+  applyTheme(theme, systemPrefersDark) {
+    const html = document.documentElement;
+    
+    // Remove existing theme attributes
+    html.removeAttribute('data-theme');
+    
+    if (theme === 'light') {
+      html.setAttribute('data-theme', 'light');
+    } else if (theme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+    } else if (theme === 'auto') {
+      // Let CSS media query handle auto mode
+      // Don't set data-theme, let prefers-color-scheme take effect
+    }
+  }
+
+  /**
+   * Update the theme toggle button icon
+   * @param {string} theme - Current theme setting
+   * @param {boolean} systemPrefersDark - Whether system prefers dark mode
+   */
+  updateThemeToggleIcon(theme, systemPrefersDark) {
+    if (!this.domElements.themeToggle) return;
+    
+    const icon = this.domElements.themeToggle.querySelector('.theme-icon');
+    if (!icon) return;
+    
+    let iconText, title;
+    
+    switch (theme) {
+      case 'light':
+        iconText = '☀️';
+        title = 'Switch to dark mode';
+        break;
+      case 'dark':
+        iconText = '🌙';
+        title = 'Switch to auto mode (follows system)';
+        break;
+      default: // 'auto'
+        iconText = systemPrefersDark ? '🌓' : '🌗';
+        title = 'Switch to light mode (currently following system)';
+        break;
+    }
+    
+    icon.textContent = iconText;
+    this.domElements.themeToggle.setAttribute('title', title);
+    this.domElements.themeToggle.setAttribute('aria-label', title);
   }
 
   /**

@@ -14,14 +14,27 @@
   <div class="container">
     <!-- Page Header with App Information -->
     <header role="banner">
-      <h1>Internet Speed Test</h1>
-      <p>Real-world connection monitoring with multiple CDN infrastructure</p>
-      <div class="test-info" role="complementary">
-        <small aria-label="Technical details">
-          ✓ Uses Cloudflare, Google, and jsDelivr CDNs for download tests |
-          ✓ HTTPBin for upload testing |
-          ✓ Multi-endpoint ping measurement
-        </small>
+      <div class="header-content">
+        <div class="header-text">
+          <h1>Internet Speed Test</h1>
+          <p>Real-world connection monitoring with multiple CDN infrastructure</p>
+          <div class="test-info" role="complementary">
+            <small aria-label="Technical details">
+              ✓ Uses Cloudflare, Google, and jsDelivr CDNs for download tests |
+              ✓ HTTPBin for upload testing |
+              ✓ Multi-endpoint ping measurement
+            </small>
+          </div>
+        </div>
+        <div class="header-controls">
+          <button 
+            id="themeToggle" 
+            class="theme-toggle" 
+            aria-label="Toggle dark mode"
+            title="Switch between light and dark themes">
+            <span class="theme-icon" aria-hidden="true">🌙</span>
+          </button>
+        </div>
       </div>
     </header>
 
