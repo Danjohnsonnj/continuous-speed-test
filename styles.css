@@ -357,9 +357,9 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: calc(1920px - var(--space-md) * 2);
     margin: 0 auto;
-    padding: var(--space-xl);
+    padding: var(--space-md);
 }
 
 /* ============================================================================
