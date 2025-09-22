@@ -318,6 +318,40 @@ main {
     100% { left: 100%; }
 }
 
+/* CSV Export Status Indicator */
+.csv-export-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    border: 1px solid #66bb6a;
+    border-radius: 8px;
+    color: #2e7d32;
+    font-weight: 500;
+    font-size: 0.9em;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.csv-export-status .export-icon {
+    font-size: 1.2em;
+    animation: pulse 1.5s infinite;
+}
+
+.csv-export-status.success {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    border-color: #66bb6a;
+    color: #2e7d32;
+}
+
+.csv-export-status.error {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    border-color: #ef5350;
+    color: #c62828;
+}
+
 /* ============================================================================
    GRAPH VISUALIZATION SECTION - Real-time speed data charts
    ============================================================================ */

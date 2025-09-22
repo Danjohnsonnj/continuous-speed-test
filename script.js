@@ -154,6 +154,7 @@ class SpeedTest {
       testStatus: document.getElementById("testStatus"),
       testProgress: document.getElementById("testProgress"),
       progressFill: document.getElementById("progressFill"),
+      csvExportStatus: document.getElementById("csvExportStatus"),
 
       // Graph
       canvas: document.getElementById("speedGraph"),
@@ -482,6 +483,18 @@ class SpeedTest {
     this.clearTestIntervals();
     this.updateUIForTestStop();
     this.calculateStatistics();
+
+    // Export test results to CSV if we have data
+    if (
+      this.measurementData.download.length > 0 ||
+      this.measurementData.upload.length > 0 ||
+      this.measurementData.ping.length > 0
+    ) {
+      // Add a small delay to ensure UI updates are complete
+      setTimeout(() => {
+        this.downloadCSV();
+      }, 100);
+    }
   }
 
   /**
@@ -1576,6 +1589,232 @@ class SpeedTest {
       arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / arr.length;
     const stdDev = Math.sqrt(variance);
     return (stdDev / mean) * 100;
+  }
+
+  /**
+   * Generate a CSV formatted string from the measurement data
+   * @returns {string} CSV formatted string containing all test results
+   */
+  generateCSV() {
+    // Create CSV header with test information
+    const testType = this.domElements.testTypeSelect.value;
+    const duration =
+      this.testDuration === 0 ? "Continuous" : `${this.testDuration}s`;
+    const startTimeFormatted = new Date(this.startTime).toISOString();
+    const endTimeFormatted = new Date(this.endTime).toISOString();
+
+    let csv = [];
+
+    // Add test metadata
+    csv.push("# Internet Speed Test Results");
+    csv.push(`# Test Type: ${testType}`);
+    csv.push(`# Duration: ${duration}`);
+    csv.push(`# Start Time: ${startTimeFormatted}`);
+    csv.push(`# End Time: ${endTimeFormatted}`);
+    csv.push(
+      `# Actual Duration: ${((this.endTime - this.startTime) / 1000).toFixed(
+        1
+      )}s`
+    );
+    csv.push(""); // Empty line separator
+
+    // Add column headers
+    const headers = [
+      "Timestamp",
+      "Relative_Time_Seconds",
+      "Download_Mbps",
+      "Upload_Mbps",
+      "Ping_ms",
+    ];
+    csv.push(headers.join(","));
+
+    // Get the maximum length of data arrays to handle potential mismatches
+    const maxLength = Math.max(
+      this.graphData.timestamps.length,
+      this.measurementData.download.length,
+      this.measurementData.upload.length,
+      this.measurementData.ping.length
+    );
+
+    // Generate data rows
+    for (let i = 0; i < maxLength; i++) {
+      const relativeTimeSeconds = this.graphData.timestamps[i] || "";
+      const relativeTime = relativeTimeSeconds
+        ? relativeTimeSeconds.toFixed(1)
+        : "";
+      const download =
+        this.measurementData.download[i] !== undefined
+          ? this.measurementData.download[i].toFixed(2)
+          : "";
+      const upload =
+        this.measurementData.upload[i] !== undefined
+          ? this.measurementData.upload[i].toFixed(2)
+          : "";
+      const ping =
+        this.measurementData.ping[i] !== undefined
+          ? this.measurementData.ping[i].toFixed(1)
+          : "";
+
+      // Convert relative time back to absolute timestamp for ISO format
+      const absoluteTimestamp = relativeTimeSeconds
+        ? this.startTime + relativeTimeSeconds * 1000
+        : "";
+      const timestampFormatted = absoluteTimestamp
+        ? new Date(absoluteTimestamp).toISOString()
+        : "";
+
+      const row = [timestampFormatted, relativeTime, download, upload, ping];
+      csv.push(row.join(","));
+    }
+
+    // Add statistics summary at the end
+    csv.push(""); // Empty line separator
+    csv.push("# Statistics Summary");
+
+    if (this.measurementData.download.length > 0) {
+      const downloadStats = {
+        avg: this.calculateAverage(this.measurementData.download).toFixed(2),
+        max: Math.max(...this.measurementData.download).toFixed(2),
+        min: Math.min(...this.measurementData.download).toFixed(2),
+      };
+      csv.push(
+        `# Download - Avg: ${downloadStats.avg} Mbps, Max: ${downloadStats.max} Mbps, Min: ${downloadStats.min} Mbps`
+      );
+    }
+
+    if (this.measurementData.upload.length > 0) {
+      const uploadStats = {
+        avg: this.calculateAverage(this.measurementData.upload).toFixed(2),
+        max: Math.max(...this.measurementData.upload).toFixed(2),
+        min: Math.min(...this.measurementData.upload).toFixed(2),
+      };
+      csv.push(
+        `# Upload - Avg: ${uploadStats.avg} Mbps, Max: ${uploadStats.max} Mbps, Min: ${uploadStats.min} Mbps`
+      );
+    }
+
+    if (this.measurementData.ping.length > 0) {
+      const pingStats = {
+        avg: this.calculateAverage(this.measurementData.ping).toFixed(1),
+        max: Math.max(...this.measurementData.ping).toFixed(1),
+        min: Math.min(...this.measurementData.ping).toFixed(1),
+      };
+      csv.push(
+        `# Ping - Avg: ${pingStats.avg} ms, Max: ${pingStats.max} ms, Min: ${pingStats.min} ms`
+      );
+    }
+
+    return csv.join("\n");
+  }
+
+  /**
+   * Generate a filename for the CSV export based on the test start time
+   * @returns {string} Filename in format: speedtest_YYYY-MM-DD_HH-MM-SS.csv
+   */
+  generateCSVFilename() {
+    const date = new Date(this.startTime);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `speedtest_${year}-${month}-${day}_${hours}-${minutes}-${seconds}.csv`;
+  }
+
+  /**
+   * Download the CSV file containing all test results
+   */
+  downloadCSV() {
+    try {
+      // Show CSV export indicator
+      this.showCSVExportStatus("Exporting test results to CSV...", "loading");
+
+      // Generate CSV content
+      const csvContent = this.generateCSV();
+
+      // Create blob and download link
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+
+      // Create download URL
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", this.generateCSVFilename());
+      link.style.visibility = "hidden";
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+
+      // Show success status
+      this.showCSVExportStatus("CSV file downloaded successfully!", "success");
+
+      // Update main test status
+      this.updateTestStatus(
+        "Test completed - CSV exported successfully",
+        false
+      );
+
+      // Hide CSV status after a delay
+      setTimeout(() => {
+        this.hideCSVExportStatus();
+      }, 3000);
+    } catch (error) {
+      console.error("CSV export failed:", error);
+      this.showCSVExportStatus("Failed to export CSV file", "error");
+      this.updateTestStatus("Test completed - CSV export failed", true);
+
+      // Hide CSV status after a delay
+      setTimeout(() => {
+        this.hideCSVExportStatus();
+      }, 3000);
+    }
+  }
+
+  /**
+   * Show the CSV export status indicator
+   * @param {string} message - Message to display
+   * @param {string} type - Type of status: 'loading', 'success', 'error'
+   */
+  showCSVExportStatus(message, type = "loading") {
+    const statusEl = this.domElements.csvExportStatus;
+    const messageEl = statusEl.querySelector(".export-message");
+    const iconEl = statusEl.querySelector(".export-icon");
+
+    // Update message
+    messageEl.textContent = message;
+
+    // Update icon based on type
+    switch (type) {
+      case "loading":
+        iconEl.textContent = "📊";
+        statusEl.className = "csv-export-status";
+        break;
+      case "success":
+        iconEl.textContent = "✅";
+        statusEl.className = "csv-export-status success";
+        break;
+      case "error":
+        iconEl.textContent = "❌";
+        statusEl.className = "csv-export-status error";
+        break;
+    }
+
+    // Show the status indicator
+    statusEl.style.display = "flex";
+  }
+
+  /**
+   * Hide the CSV export status indicator
+   */
+  hideCSVExportStatus() {
+    this.domElements.csvExportStatus.style.display = "none";
   }
 }
 
