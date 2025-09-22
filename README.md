@@ -23,6 +23,7 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Configurable Duration**: Test periods from 30 seconds to 5 minutes
 - **CSV Data Export**: Automatic export of performance data with timestamp-based filenames
 - **Configurable Measurement Intervals**: Adjustable data collection frequency (1-5 seconds)
+- **Wake Lock Support**: Keep device awake during long tests to prevent interruption
 
 ### User Experience
 
@@ -38,6 +39,7 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Comprehensive Analytics**: Detailed stats including averages, peaks, and consistency metrics
 - **Data Export**: Automatic CSV export with downloadable performance data over time
 - **Measurement Control**: Configurable data collection intervals with reliability guidance
+- **Device Management**: Wake lock toggle to prevent device sleep during extended monitoring sessions
 
 ### Technical Features
 
@@ -51,6 +53,7 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Data Persistence**: Automatic CSV export with comprehensive performance metrics and localStorage theme preferences
 - **Measurement Flexibility**: Configurable data collection intervals (1-5 seconds) with reliability guidance
 - **Professional Statistics**: Industry-standard calculations excluding connection establishment delays
+- **Wake Lock Integration**: Automatic device sleep prevention with graceful fallback for unsupported browsers
 
 ## 🏗️ Project Structure
 
@@ -78,7 +81,7 @@ continuous-speed-test/
 **Purpose**: Comprehensive styling system with modern design and dark mode support
 
 - **Modern Design System**: CSS custom properties for consistent theming and elegant typography
-- **Dual Theme Support**: 
+- **Dual Theme Support**:
   - Light mode with refined blue accents and clean aesthetics
   - Monochromatic dark mode using only blacks, greys, and whites
   - Automatic system preference detection via `prefers-color-scheme`
@@ -92,21 +95,26 @@ continuous-speed-test/
 - **Professional Polish**: Glass morphism effects, smooth transitions, and premium visual hierarchy
 - **Mobile-First**: Responsive design optimized for all screen sizes and touch interactions
 
-#### `script.js` (2000+ lines)
+#### `script.js` (2200+ lines)
 
-**Purpose**: Core application logic with intelligent performance monitoring
+**Purpose**: Core application logic with intelligent performance monitoring and device management
 
 - **ES6 Class Architecture**: Clean, modular SpeedTest class with enhanced feature set
 - **Real Network Testing**: Integration with Cloudflare Speed Test, HTTPBin, and major CDN providers
-- **Smart Analytics**: 
+- **Wake Lock Management**:
+  - Navigator.wakeLock API integration with browser compatibility detection
+  - Automatic lifecycle management tied to test start/stop events
+  - Graceful fallback handling for unsupported browsers
+  - Real-time status feedback and error handling
+- **Smart Analytics**:
   - Warm-up period filtering for accurate statistics
   - Dynamic graph coloring for performance alerts
   - Professional-grade data analysis excluding startup artifacts
-- **Theme Management**: 
+- **Theme Management**:
   - Automatic system preference detection
   - Manual theme switching with localStorage persistence
   - Three-mode toggle (Light → Dark → Auto)
-- **Enhanced Visualization**: 
+- **Enhanced Visualization**:
   - Dynamic line coloring based on performance thresholds
   - Reference lines for performance benchmarks
   - Color-coded speed zones for instant visual feedback
@@ -151,12 +159,13 @@ continuous-speed-test/
 1. **Theme Selection**: Choose your preferred appearance with the theme toggle (☀️ Light / 🌙 Dark / 🌓 Auto)
 2. **Select Test Duration**: Choose from 30 seconds to 5 minutes
 3. **Configure Data Collection**: Adjust measurement interval (1-5 seconds) based on your needs
-4. **Start Test**: Click "Start Speed Test" to begin monitoring
-5. **Monitor Performance**: Watch for red line segments indicating speeds below 10 Mbps
-6. **View Real-time Data**: Observe live speed metrics with warm-up period for accurate readings
-7. **Analyze Results**: Review refined statistics that exclude startup artifacts
-8. **Export Data**: CSV files are automatically generated and downloaded during tests
-9. **Toggle Graph Data**: Use buttons to show/hide different metrics with color-coded performance zones
+4. **Enable Wake Lock** (Optional): Check "Keep device awake" to prevent sleep during long tests
+5. **Start Test**: Click "Start Speed Test" to begin monitoring
+6. **Monitor Performance**: Watch for red line segments indicating speeds below 10 Mbps
+7. **View Real-time Data**: Observe live speed metrics with warm-up period for accurate readings
+8. **Analyze Results**: Review refined statistics that exclude startup artifacts
+9. **Export Data**: CSV files are automatically generated and downloaded during tests
+10. **Toggle Graph Data**: Use buttons to show/hide different metrics with color-coded performance zones
 
 ## 🔧 Technical Implementation
 
@@ -184,6 +193,15 @@ continuous-speed-test/
 - **CORS-Compatible**: Uses `no-cors` mode to avoid cross-origin issues
 - **HTTP-based**: Uses fetch() with small requests for latency measurement
 - **Statistical Analysis**: Calculates median ping time for better accuracy
+
+#### Wake Lock Management
+
+- **Navigator.wakeLock API**: Prevents device screen from turning off during tests
+- **Browser Compatibility**: Automatic detection with graceful fallback for unsupported browsers
+- **Lifecycle Management**: Automatically enables/disables with test start/stop events
+- **Manual Control**: User-controlled toggle with real-time status feedback
+- **Error Handling**: Comprehensive error recovery and user notification
+- **Accessibility**: Full ARIA support with screen reader announcements
 
 ### Performance Considerations
 
@@ -245,6 +263,12 @@ class SpeedTest {
   downloadCSV()
   updateMeasurementInterval()
 
+  // Wake lock management
+  initializeWakeLock()
+  requestWakeLock()
+  releaseWakeLock()
+  updateStayAwakeStatus()
+
   // Visualization
   updateGraph()
   updateUI()
@@ -256,11 +280,11 @@ class SpeedTest {
 
 ### Browser Compatibility
 
-- **Chrome**: 60+ (Full support)
-- **Firefox**: 55+ (Full support)
-- **Safari**: 12+ (Full support)
-- **Edge**: 79+ (Full support)
-- **Mobile**: iOS Safari 12+, Chrome Mobile 60+
+- **Chrome**: 60+ (Full support including Wake Lock API)
+- **Firefox**: 55+ (Full support, Wake Lock API in development)
+- **Safari**: 12+ (Full support, Wake Lock API not yet supported)
+- **Edge**: 79+ (Full support including Wake Lock API)
+- **Mobile**: iOS Safari 12+, Chrome Mobile 60+ (Wake Lock support varies)
 
 ## 📊 Architecture Decisions
 

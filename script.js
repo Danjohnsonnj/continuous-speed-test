@@ -26,6 +26,10 @@ class SpeedTest {
     this.testDuration = 60; // Default: 1 minute
     this.currentTestSize = 0; // Progressive test size index
 
+    // Wake lock management
+    this.wakeLock = null;
+    this.wakeLockSupported = 'wakeLock' in navigator;
+
     // Interval references for cleanup
     this.measurementInterval = null;
     this.progressInterval = null;
@@ -170,6 +174,10 @@ class SpeedTest {
       // Theme toggle
       themeToggle: document.getElementById("themeToggle"),
 
+      // Stay awake control
+      stayAwake: document.getElementById("stayAwake"),
+      stayAwakeStatus: document.getElementById("stayAwakeStatus"),
+
       // Statistics
       stats: {
         avgDownload: document.getElementById("avgDownload"),
@@ -205,6 +213,7 @@ class SpeedTest {
     this.initializeGraph();
     this.updateUIForTestType();
     this.initializeMeasurementInterval();
+    this.initializeWakeLock();
   }
 
   /**
@@ -215,6 +224,26 @@ class SpeedTest {
       this.domElements.measurementIntervalSlider.value
     );
     this.updateMeasurementInterval(defaultInterval);
+  }
+
+  /**
+   * Initialize wake lock feature and check browser support
+   */
+  initializeWakeLock() {
+    if (!this.wakeLockSupported) {
+      // Disable the checkbox and show unsupported message
+      if (this.domElements.stayAwake) {
+        this.domElements.stayAwake.disabled = true;
+        this.domElements.stayAwake.title = 'Wake Lock API not supported in this browser';
+        this.updateStayAwakeStatus('Not supported', 'error');
+      }
+    } else {
+      // Enable the checkbox for supported browsers
+      if (this.domElements.stayAwake) {
+        this.domElements.stayAwake.disabled = false;
+        this.domElements.stayAwake.title = 'Keep your device awake during long speed tests';
+      }
+    }
   }
 
   /**
@@ -255,11 +284,32 @@ class SpeedTest {
       });
     }
 
+    // Stay awake control
+    if (this.domElements.stayAwake) {
+      this.domElements.stayAwake.addEventListener("change", (e) => {
+        this.handleStayAwakeToggle(e.target.checked);
+      });
+    }
+
     // Initialize theme from localStorage or system preference
     this.initializeTheme();
 
     // Initialize UI state
     this.updateUIForTestType();
+
+    // Handle page visibility changes for wake lock
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && this.wakeLock) {
+        // Wake lock will be automatically released when page becomes hidden
+        // We'll handle re-requesting it when page becomes visible again
+      } else if (document.visibilityState === 'visible' && 
+                 this.domElements.stayAwake.checked && 
+                 this.isRunning && 
+                 !this.wakeLock) {
+        // Re-request wake lock if it was previously enabled and test is running
+        this.requestWakeLock();
+      }
+    });
   }
 
   /**
@@ -394,6 +444,93 @@ class SpeedTest {
     icon.textContent = iconText;
     this.domElements.themeToggle.setAttribute('title', title);
     this.domElements.themeToggle.setAttribute('aria-label', title);
+  }
+
+  /**
+   * Handle stay awake toggle change
+   * @param {boolean} enabled - Whether stay awake should be enabled
+   */
+  async handleStayAwakeToggle(enabled) {
+    if (!this.wakeLockSupported) {
+      this.updateStayAwakeStatus('Wake Lock not supported in this browser', 'error');
+      this.domElements.stayAwake.checked = false;
+      return;
+    }
+
+    if (enabled) {
+      await this.requestWakeLock();
+    } else {
+      this.releaseWakeLock();
+    }
+  }
+
+  /**
+   * Request wake lock to keep device awake
+   */
+  async requestWakeLock() {
+    try {
+      this.wakeLock = await navigator.wakeLock.request('screen');
+      this.updateStayAwakeStatus('Device will stay awake', 'success');
+      
+      // Listen for wake lock release (e.g., when tab becomes hidden)
+      this.wakeLock.addEventListener('release', () => {
+        // Only update UI if the wake lock was released automatically (not by us)
+        if (this.wakeLock) {
+          this.wakeLock = null;
+          this.updateStayAwakeStatus('Wake lock automatically released', 'info');
+          this.domElements.stayAwake.checked = false;
+          
+          // Clear the status message after a delay
+          setTimeout(() => {
+            this.updateStayAwakeStatus('', '');
+          }, 4000);
+        }
+      });
+      
+    } catch (error) {
+      console.error('Failed to request wake lock:', error);
+      this.updateStayAwakeStatus('Failed to keep device awake', 'error');
+      this.domElements.stayAwake.checked = false;
+      
+      // Clear error message after a delay
+      setTimeout(() => {
+        this.updateStayAwakeStatus('', '');
+      }, 4000);
+    }
+  }
+
+  /**
+   * Release the current wake lock
+   */
+  releaseWakeLock() {
+    if (this.wakeLock) {
+      this.wakeLock.release();
+      this.wakeLock = null;
+      
+      // Update UI to reflect that wake lock is no longer active
+      if (this.domElements.stayAwake) {
+        this.domElements.stayAwake.checked = false;
+      }
+      this.updateStayAwakeStatus('Wake lock disabled', 'info');
+      
+      // Clear the status message after a short delay
+      setTimeout(() => {
+        this.updateStayAwakeStatus('', '');
+      }, 3000);
+    }
+  }
+
+  /**
+   * Update stay awake status message
+   * @param {string} message - Status message
+   * @param {string} type - Message type: 'success', 'error', 'info', or ''
+   */
+  updateStayAwakeStatus(message, type = '') {
+    const statusEl = this.domElements.stayAwakeStatus;
+    if (!statusEl) return;
+    
+    statusEl.textContent = message;
+    statusEl.className = `stay-awake-status ${type}`;
   }
 
   /**
@@ -548,6 +685,12 @@ class SpeedTest {
     try {
       this.initializeTestRun();
       this.updateUIForTestStart();
+      
+      // Activate wake lock if enabled
+      if (this.domElements.stayAwake.checked) {
+        await this.requestWakeLock();
+      }
+      
       this.startTestIntervals();
 
       // Perform initial measurement
@@ -657,6 +800,9 @@ class SpeedTest {
     this.clearTestIntervals();
     this.updateUIForTestStop();
     this.calculateStatistics();
+    
+    // Release wake lock when test stops
+    this.releaseWakeLock();
 
     // Export test results to CSV if we have data
     if (
