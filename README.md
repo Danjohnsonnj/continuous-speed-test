@@ -2,6 +2,8 @@
 
 A modern, accessible web application for testing internet connection speeds using real-world infrastructure. Built with vanilla HTML, CSS, and JavaScript, this tool provides accurate speed measurements through Cloudflare Speed Test endpoints, HTTPBin, and major CDN services.
 
+**✨ Now featuring elegant dark mode, smart performance alerts, and refined statistics!**
+
 ## 🎯 Project Goals
 
 - **Real-world Testing**: Use actual network infrastructure (Cloudflare, HTTPBin, Google/GitHub CDNs) instead of simulated tests
@@ -24,11 +26,16 @@ A modern, accessible web application for testing internet connection speeds usin
 
 ### User Experience
 
-- **Responsive Design**: Mobile-first responsive layout
-- **Accessibility**: Full WCAG compliance with ARIA labels and semantic markup
+- **Modern Design System**: Elegant, minimalist interface with sophisticated typography and refined color palette
+- **Smart Dark Mode**: Automatic system preference detection with manual toggle (Light → Dark → Auto modes)
+- **Monochromatic Dark Theme**: Professional black, grey, and white color scheme for focused work sessions
+- **Responsive Design**: Mobile-first responsive layout with optimized touch targets
+- **Accessibility**: Full WCAG AA/AAA compliance with enhanced contrast ratios and screen reader support
 - **Real-time Updates**: Live speed metrics and progress indicators
-- **Interactive Graph**: Toggle different metrics on/off in real-time
-- **Comprehensive Statistics**: Detailed stats including averages, peaks, and consistency metrics
+- **Smart Performance Alerts**: Visual warnings when speeds drop below 10 Mbps threshold
+- **Interactive Graph**: Toggle different metrics on/off in real-time with color-coded performance zones
+- **Refined Statistics**: Warm-up period exclusion for accurate minimum/average calculations
+- **Comprehensive Analytics**: Detailed stats including averages, peaks, and consistency metrics
 - **Data Export**: Automatic CSV export with downloadable performance data over time
 - **Measurement Control**: Configurable data collection intervals with reliability guidance
 
@@ -38,8 +45,12 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Fallback Systems**: Multiple endpoint redundancy for reliable testing
 - **Error Recovery**: Graceful degradation when endpoints are unavailable
 - **Performance Optimized**: Efficient DOM updates and minimal resource usage
-- **Data Persistence**: Automatic CSV export with comprehensive performance metrics
+- **Smart Data Filtering**: Warm-up period exclusion prevents startup artifacts from skewing statistics
+- **Dynamic Graph Coloring**: Real-time visual alerts for speeds below performance thresholds
+- **Theme System**: Comprehensive CSS custom properties with system preference integration
+- **Data Persistence**: Automatic CSV export with comprehensive performance metrics and localStorage theme preferences
 - **Measurement Flexibility**: Configurable data collection intervals (1-5 seconds) with reliability guidance
+- **Professional Statistics**: Industry-standard calculations excluding connection establishment delays
 
 ## 🏗️ Project Structure
 
@@ -62,31 +73,47 @@ continuous-speed-test/
 - **Progressive Enhancement**: Works without JavaScript for basic functionality
 - **SEO Optimized**: Proper meta tags and semantic markup
 
-#### `styles.css` (580+ lines)
+#### `styles.css` (1200+ lines)
 
-**Purpose**: Comprehensive styling system organized for maintainability
+**Purpose**: Comprehensive styling system with modern design and dark mode support
 
+- **Modern Design System**: CSS custom properties for consistent theming and elegant typography
+- **Dual Theme Support**: 
+  - Light mode with refined blue accents and clean aesthetics
+  - Monochromatic dark mode using only blacks, greys, and whites
+  - Automatic system preference detection via `prefers-color-scheme`
+- **Enhanced Accessibility**: WCAG AA/AAA compliant contrast ratios with improved button visibility
 - **Section Organization**:
-  - Reset and base styles
-  - Layout foundation (CSS Grid/Flexbox)
-  - Component-specific styling
+  - CSS custom properties design system
+  - Theme detection and switching logic
+  - Component-specific styling with theme awareness
   - Responsive design breakpoints
   - Animation and interaction states
-- **Design System**: Consistent colors, typography, and spacing
-- **Accessibility**: Focus indicators, high contrast, and screen reader support
-- **Mobile-First**: Responsive design for all screen sizes
+- **Professional Polish**: Glass morphism effects, smooth transitions, and premium visual hierarchy
+- **Mobile-First**: Responsive design optimized for all screen sizes and touch interactions
 
-#### `script.js` (1800+ lines)
+#### `script.js` (2000+ lines)
 
-**Purpose**: Core application logic with real network testing
+**Purpose**: Core application logic with intelligent performance monitoring
 
-- **ES6 Class Architecture**: Clean, modular SpeedTest class
+- **ES6 Class Architecture**: Clean, modular SpeedTest class with enhanced feature set
 - **Real Network Testing**: Integration with Cloudflare Speed Test, HTTPBin, and major CDN providers
+- **Smart Analytics**: 
+  - Warm-up period filtering for accurate statistics
+  - Dynamic graph coloring for performance alerts
+  - Professional-grade data analysis excluding startup artifacts
+- **Theme Management**: 
+  - Automatic system preference detection
+  - Manual theme switching with localStorage persistence
+  - Three-mode toggle (Light → Dark → Auto)
+- **Enhanced Visualization**: 
+  - Dynamic line coloring based on performance thresholds
+  - Reference lines for performance benchmarks
+  - Color-coded speed zones for instant visual feedback
 - **Progressive Testing**: Intelligent file size progression for accuracy
-- **Error Handling**: Comprehensive fallback strategies
-- **Canvas Visualization**: Real-time graphing with interactive controls
-- **Data Export**: CSV generation and automatic download functionality
-- **Configurable Intervals**: Dynamic measurement timing for optimal data collection
+- **Error Handling**: Comprehensive fallback strategies with graceful degradation
+- **Performance Optimized**: Efficient canvas rendering and DOM updates
+- **Data Export**: Enhanced CSV generation with comprehensive metrics
 
 ## 🚀 Getting Started
 
@@ -121,13 +148,15 @@ continuous-speed-test/
 
 ### Usage
 
-1. **Select Test Duration**: Choose from 30 seconds to 5 minutes
-2. **Configure Data Collection**: Adjust measurement interval (1-5 seconds) based on your needs
-3. **Start Test**: Click "Start Speed Test" to begin monitoring
-4. **View Real-time Data**: Watch live speed metrics and graph updates
-5. **Export Data**: CSV files are automatically generated and downloaded during tests
-6. **Analyze Results**: Review comprehensive statistics after test completion
-7. **Toggle Graph Data**: Use buttons to show/hide different metrics on the graph
+1. **Theme Selection**: Choose your preferred appearance with the theme toggle (☀️ Light / 🌙 Dark / 🌓 Auto)
+2. **Select Test Duration**: Choose from 30 seconds to 5 minutes
+3. **Configure Data Collection**: Adjust measurement interval (1-5 seconds) based on your needs
+4. **Start Test**: Click "Start Speed Test" to begin monitoring
+5. **Monitor Performance**: Watch for red line segments indicating speeds below 10 Mbps
+6. **View Real-time Data**: Observe live speed metrics with warm-up period for accurate readings
+7. **Analyze Results**: Review refined statistics that exclude startup artifacts
+8. **Export Data**: CSV files are automatically generated and downloaded during tests
+9. **Toggle Graph Data**: Use buttons to show/hide different metrics with color-coded performance zones
 
 ## 🔧 Technical Implementation
 

@@ -58,11 +58,14 @@ class SpeedTest {
       showDownload: true,
       showUpload: true,
       maxDataPoints: 50,
+      slowSpeedThreshold: 10, // Mbps threshold for red coloring
       colors: {
         download: "#2196f3",
         upload: "#9c27b0",
+        slowSpeed: "#ef4444", // Red for speeds below threshold
         grid: "#f0f0f0",
         axis: "#333",
+        reference: "#fbbf24", // Yellow for reference lines
       },
     };
 
@@ -131,6 +134,7 @@ class SpeedTest {
       validSpeedRange: { min: 0, max: 10000 }, // Mbps
       validPingRange: { min: 5, max: 5000 }, // ms
       continuousConnections: 2, // Number of overlapping connections to maintain
+      warmupMeasurements: 3, // Number of initial measurements to exclude from statistics
     };
   }
 
@@ -1622,42 +1626,62 @@ class SpeedTest {
       ctx.fillText(((maxTime * i) / 5).toFixed(0) + "s", x, rect.height - 10);
     }
 
-    // Draw data lines
-    const drawLine = (data, color) => {
+    // Draw data lines with dynamic coloring
+    const drawLine = (data, normalColor) => {
       if (data.length < 2) return;
 
-      ctx.strokeStyle = color;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-
-      let firstPoint = true;
-      for (let i = 0; i < data.length; i++) {
+      
+      // Draw line segments, changing color when speed drops below threshold
+      for (let i = 0; i < data.length - 1; i++) {
         // Skip null values (failed measurements)
-        if (data[i] === null || data[i] <= 0) continue;
+        if (data[i] === null || data[i] <= 0 || data[i + 1] === null || data[i + 1] <= 0) continue;
 
-        const x =
-          padding + (this.graphData.timestamps[i] / maxTime) * graphWidth;
-        const y = padding + (1 - data[i] / maxSpeed) * graphHeight;
+        const x1 = padding + (this.graphData.timestamps[i] / maxTime) * graphWidth;
+        const y1 = padding + (1 - data[i] / maxSpeed) * graphHeight;
+        const x2 = padding + (this.graphData.timestamps[i + 1] / maxTime) * graphWidth;
+        const y2 = padding + (1 - data[i + 1] / maxSpeed) * graphHeight;
 
-        if (firstPoint) {
-          ctx.moveTo(x, y);
-          firstPoint = false;
-        } else {
-          ctx.lineTo(x, y);
-        }
+        // Determine color based on speed values
+        // Use red if either point is below the threshold
+        const useRedColor = data[i] < this.graphSettings.slowSpeedThreshold || 
+                           data[i + 1] < this.graphSettings.slowSpeedThreshold;
+        ctx.strokeStyle = useRedColor ? this.graphSettings.colors.slowSpeed : normalColor;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
       }
-
-      ctx.stroke();
     };
 
     // Draw download line
     if (this.graphSettings.showDownload) {
-      drawLine(this.graphData.download, "#2196f3");
+      drawLine(this.graphData.download, this.graphSettings.colors.download);
     }
 
     // Draw upload line
     if (this.graphSettings.showUpload) {
-      drawLine(this.graphData.upload, "#9c27b0");
+      drawLine(this.graphData.upload, this.graphSettings.colors.upload);
+    }
+
+    // Draw 10 Mbps reference line if the scale allows it
+    if (maxSpeed >= this.graphSettings.slowSpeedThreshold) {
+      const referenceY = padding + (1 - this.graphSettings.slowSpeedThreshold / maxSpeed) * graphHeight;
+      ctx.strokeStyle = this.graphSettings.colors.reference;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(padding, referenceY);
+      ctx.lineTo(rect.width - 20, referenceY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Add reference line label
+      ctx.fillStyle = this.graphSettings.colors.reference;
+      ctx.font = "11px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText("10 Mbps", padding + 5, referenceY - 5);
     }
 
     // Draw axes
@@ -1673,67 +1697,90 @@ class SpeedTest {
   calculateStatistics() {
     const testType = this.domElements.testTypeSelect.value;
 
-    // Download statistics
+    // Download statistics (using warmed-up data)
     if (
       (testType === "download" || testType === "both") &&
       this.measurementData.download.length > 0
     ) {
-      const avgDownload = this.calculateAverage(this.measurementData.download);
-      const maxDownload = Math.max(...this.measurementData.download);
-      const minDownload = Math.min(...this.measurementData.download);
-
-      document.getElementById("avgDownload").textContent =
-        avgDownload.toFixed(1) + " Mbps";
-      document.getElementById("maxDownload").textContent =
-        maxDownload.toFixed(1) + " Mbps";
-      document.getElementById("minDownload").textContent =
-        minDownload.toFixed(1) + " Mbps";
+      const stats = this.calculateWarmedUpStats(this.measurementData.download);
+      const warmedUpData = this.getWarmedUpData(this.measurementData.download);
+      
+      if (warmedUpData.length > 0) {
+        document.getElementById("avgDownload").textContent =
+          stats.avg.toFixed(1) + " Mbps";
+        document.getElementById("maxDownload").textContent =
+          stats.max.toFixed(1) + " Mbps";
+        document.getElementById("minDownload").textContent =
+          stats.min.toFixed(1) + " Mbps";
+      } else {
+        // Still warming up
+        document.getElementById("avgDownload").textContent = "Warming up...";
+        document.getElementById("maxDownload").textContent = "Warming up...";
+        document.getElementById("minDownload").textContent = "Warming up...";
+      }
     } else {
       document.getElementById("avgDownload").textContent = "-- Mbps";
       document.getElementById("maxDownload").textContent = "-- Mbps";
       document.getElementById("minDownload").textContent = "-- Mbps";
     }
 
-    // Upload statistics
+    // Upload statistics (using warmed-up data)
     if (
       (testType === "upload" || testType === "both") &&
       this.measurementData.upload.length > 0
     ) {
-      const avgUpload = this.calculateAverage(this.measurementData.upload);
-      const maxUpload = Math.max(...this.measurementData.upload);
-      const minUpload = Math.min(...this.measurementData.upload);
-
-      document.getElementById("avgUpload").textContent =
-        avgUpload.toFixed(1) + " Mbps";
-      document.getElementById("maxUpload").textContent =
-        maxUpload.toFixed(1) + " Mbps";
-      document.getElementById("minUpload").textContent =
-        minUpload.toFixed(1) + " Mbps";
+      const stats = this.calculateWarmedUpStats(this.measurementData.upload);
+      const warmedUpData = this.getWarmedUpData(this.measurementData.upload);
+      
+      if (warmedUpData.length > 0) {
+        document.getElementById("avgUpload").textContent =
+          stats.avg.toFixed(1) + " Mbps";
+        document.getElementById("maxUpload").textContent =
+          stats.max.toFixed(1) + " Mbps";
+        document.getElementById("minUpload").textContent =
+          stats.min.toFixed(1) + " Mbps";
+      } else {
+        // Still warming up
+        document.getElementById("avgUpload").textContent = "Warming up...";
+        document.getElementById("maxUpload").textContent = "Warming up...";
+        document.getElementById("minUpload").textContent = "Warming up...";
+      }
     } else {
       document.getElementById("avgUpload").textContent = "-- Mbps";
       document.getElementById("maxUpload").textContent = "-- Mbps";
       document.getElementById("minUpload").textContent = "-- Mbps";
     }
 
-    // Stability calculation (coefficient of variation)
+    // Stability calculation (coefficient of variation) - using warmed-up data
     let stability = 0;
     if (testType === "download" && this.measurementData.download.length > 0) {
-      const downloadCV = this.calculateCV(this.measurementData.download);
-      stability = Math.max(0, 100 - downloadCV);
+      const warmedUpData = this.getWarmedUpData(this.measurementData.download);
+      if (warmedUpData.length > 0) {
+        const downloadCV = this.calculateCV(warmedUpData);
+        stability = Math.max(0, 100 - downloadCV);
+      }
     } else if (
       testType === "upload" &&
       this.measurementData.upload.length > 0
     ) {
-      const uploadCV = this.calculateCV(this.measurementData.upload);
-      stability = Math.max(0, 100 - uploadCV);
+      const warmedUpData = this.getWarmedUpData(this.measurementData.upload);
+      if (warmedUpData.length > 0) {
+        const uploadCV = this.calculateCV(warmedUpData);
+        stability = Math.max(0, 100 - uploadCV);
+      }
     } else if (
       testType === "both" &&
       this.measurementData.download.length > 0 &&
       this.measurementData.upload.length > 0
     ) {
-      const downloadCV = this.calculateCV(this.measurementData.download);
-      const uploadCV = this.calculateCV(this.measurementData.upload);
-      stability = Math.max(0, 100 - (downloadCV + uploadCV) / 2);
+      const warmedUpDownload = this.getWarmedUpData(this.measurementData.download);
+      const warmedUpUpload = this.getWarmedUpData(this.measurementData.upload);
+      
+      if (warmedUpDownload.length > 0 && warmedUpUpload.length > 0) {
+        const downloadCV = this.calculateCV(warmedUpDownload);
+        const uploadCV = this.calculateCV(warmedUpUpload);
+        stability = Math.max(0, 100 - (downloadCV + uploadCV) / 2);
+      }
     }
 
     // Duration
@@ -1747,6 +1794,38 @@ class SpeedTest {
 
   calculateAverage(arr) {
     return arr.reduce((sum, val) => sum + val, 0) / arr.length;
+  }
+
+  /**
+   * Get warmed-up data by excluding initial measurements
+   * @param {Array} data - Full measurement array
+   * @returns {Array} Data with warm-up period excluded
+   */
+  getWarmedUpData(data) {
+    const warmupCount = this.testConfig.warmupMeasurements;
+    if (data.length <= warmupCount) {
+      // If we don't have enough data, return empty array
+      return [];
+    }
+    return data.slice(warmupCount);
+  }
+
+  /**
+   * Calculate statistics using only warmed-up data
+   * @param {Array} data - Full measurement array
+   * @returns {Object} Statistics object with avg, max, min
+   */
+  calculateWarmedUpStats(data) {
+    const warmedUpData = this.getWarmedUpData(data);
+    if (warmedUpData.length === 0) {
+      return { avg: 0, max: 0, min: 0 };
+    }
+    
+    return {
+      avg: this.calculateAverage(warmedUpData),
+      max: Math.max(...warmedUpData),
+      min: Math.min(...warmedUpData)
+    };
   }
 
   calculateCV(arr) {
