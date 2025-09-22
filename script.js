@@ -125,7 +125,7 @@ class SpeedTest {
         50 * 1024 * 1024, // 50MB - match download max
       ],
       currentSizeIndex: 0,
-      measurementInterval: 3000, // 3 seconds between measurements (longer for TCP optimization)
+      measurementInterval: 3000, // 3 seconds between measurements (will be updated by user selection)
       continuousTestInterval: 500, // 500ms between starting new continuous tests
       progressUpdateInterval: 100, // 100ms for progress updates
       validSpeedRange: { min: 0, max: 10000 }, // Mbps
@@ -144,6 +144,8 @@ class SpeedTest {
       startStopBtn: document.getElementById("startStopBtn"),
       testDurationSelect: document.getElementById("testDuration"),
       testTypeSelect: document.getElementById("testType"),
+      measurementIntervalSlider: document.getElementById("measurementInterval"),
+      intervalValue: document.getElementById("intervalValue"),
 
       // Speed displays
       downloadSpeed: document.getElementById("downloadSpeed"),
@@ -192,6 +194,17 @@ class SpeedTest {
     this.setupEventListeners();
     this.initializeGraph();
     this.updateUIForTestType();
+    this.initializeMeasurementInterval();
+  }
+
+  /**
+   * Initialize the measurement interval control with default value
+   */
+  initializeMeasurementInterval() {
+    const defaultInterval = parseInt(
+      this.domElements.measurementIntervalSlider.value
+    );
+    this.updateMeasurementInterval(defaultInterval);
   }
 
   /**
@@ -207,6 +220,14 @@ class SpeedTest {
     this.domElements.testTypeSelect.addEventListener("change", () => {
       this.updateUIForTestType();
     });
+
+    // Measurement interval changes
+    this.domElements.measurementIntervalSlider.addEventListener(
+      "input",
+      (e) => {
+        this.updateMeasurementInterval(e.target.value);
+      }
+    );
 
     // Graph toggle controls
     this.domElements.toggleDownload.addEventListener("click", (e) => {
@@ -251,6 +272,27 @@ class SpeedTest {
 
     this.updateSpeedCardVisibility(testType);
     this.updateGraphToggleVisibility(testType);
+  }
+
+  /**
+   * Update the measurement interval based on user selection
+   * @param {string} intervalSeconds - The selected interval in seconds
+   */
+  updateMeasurementInterval(intervalSeconds) {
+    const interval = parseInt(intervalSeconds);
+    this.testConfig.measurementInterval = interval * 1000; // Convert to milliseconds
+
+    // Update the display value
+    this.domElements.intervalValue.textContent = `${interval}s`;
+
+    // If a test is currently running, restart the measurement interval
+    if (this.isRunning && this.measurementInterval) {
+      clearInterval(this.measurementInterval);
+      this.measurementInterval = setInterval(
+        () => this.performMeasurement(),
+        this.testConfig.measurementInterval
+      );
+    }
   }
 
   /**

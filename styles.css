@@ -166,6 +166,68 @@ main {
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
+/* Interval control styling */
+.interval-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.interval-control input[type="range"] {
+    width: 80px;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.interval-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.interval-control input[type="range"]::-webkit-slider-thumb:hover {
+    background: #5a6fd8;
+    transform: scale(1.1);
+}
+
+.interval-control input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #667eea;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.interval-control input[type="range"]::-moz-range-thumb:hover {
+    background: #5a6fd8;
+    transform: scale(1.1);
+}
+
+.interval-control input[type="range"]:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+.interval-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #667eea;
+    min-width: 25px;
+    text-align: center;
+}
+
 /* ============================================================================
    SPEED METRICS SECTION - Real-time speed measurement display
    ============================================================================ */

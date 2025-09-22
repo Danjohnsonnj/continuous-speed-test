@@ -38,9 +38,9 @@
         <div class="test-settings">
           <label for="testType">Test Type:</label>
           <select id="testType" aria-describedby="test-type-help">
-            <option value="both" selected>Download &amp; Upload</option>
-            <option value="download">Download Only</option>
+            <option value="download" selected>Download Only</option>
             <option value="upload">Upload Only</option>
+            <option value="both">Download &amp; Upload</option>
           </select>
           <span id="test-type-help" class="visually-hidden">
             Choose what aspects of your connection to test
@@ -59,6 +59,20 @@
           </select>
           <span id="duration-help" class="visually-hidden">
             How long to run the speed test
+          </span>
+        </div>
+
+        <div class="test-settings">
+          <label for="measurementInterval">Data Interval:</label>
+          <div class="interval-control">
+            <input type="range" id="measurementInterval" min="1" max="5" step="1" value="3"
+              aria-describedby="interval-help"
+              title="Measurement interval: 1s = more data points but less reliable, 3s+ = fewer points but more accurate">
+            <span class="interval-value" id="intervalValue">3s</span>
+          </div>
+          <span id="interval-help" class="visually-hidden">
+            Time between CSV data points. Shorter intervals provide more data but may be less reliable due to network
+            warm-up time.
           </span>
         </div>
       </section>

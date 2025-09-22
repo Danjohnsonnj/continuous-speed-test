@@ -19,6 +19,8 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Ping/Latency Testing**: Multi-endpoint ping measurement for accurate latency detection
 - **Real-time Graphing**: Live visualization of speed data using HTML5 Canvas
 - **Configurable Duration**: Test periods from 30 seconds to 5 minutes
+- **CSV Data Export**: Automatic export of performance data with timestamp-based filenames
+- **Configurable Measurement Intervals**: Adjustable data collection frequency (1-5 seconds)
 
 ### User Experience
 
@@ -27,6 +29,8 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Real-time Updates**: Live speed metrics and progress indicators
 - **Interactive Graph**: Toggle different metrics on/off in real-time
 - **Comprehensive Statistics**: Detailed stats including averages, peaks, and consistency metrics
+- **Data Export**: Automatic CSV export with downloadable performance data over time
+- **Measurement Control**: Configurable data collection intervals with reliability guidance
 
 ### Technical Features
 
@@ -34,6 +38,8 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Fallback Systems**: Multiple endpoint redundancy for reliable testing
 - **Error Recovery**: Graceful degradation when endpoints are unavailable
 - **Performance Optimized**: Efficient DOM updates and minimal resource usage
+- **Data Persistence**: Automatic CSV export with comprehensive performance metrics
+- **Measurement Flexibility**: Configurable data collection intervals (1-5 seconds) with reliability guidance
 
 ## 🏗️ Project Structure
 
@@ -70,7 +76,7 @@ continuous-speed-test/
 - **Accessibility**: Focus indicators, high contrast, and screen reader support
 - **Mobile-First**: Responsive design for all screen sizes
 
-#### `script.js` (1100+ lines)
+#### `script.js` (1800+ lines)
 
 **Purpose**: Core application logic with real network testing
 
@@ -79,6 +85,8 @@ continuous-speed-test/
 - **Progressive Testing**: Intelligent file size progression for accuracy
 - **Error Handling**: Comprehensive fallback strategies
 - **Canvas Visualization**: Real-time graphing with interactive controls
+- **Data Export**: CSV generation and automatic download functionality
+- **Configurable Intervals**: Dynamic measurement timing for optimal data collection
 
 ## 🚀 Getting Started
 
@@ -114,10 +122,12 @@ continuous-speed-test/
 ### Usage
 
 1. **Select Test Duration**: Choose from 30 seconds to 5 minutes
-2. **Start Test**: Click "Start Speed Test" to begin monitoring
-3. **View Real-time Data**: Watch live speed metrics and graph updates
-4. **Analyze Results**: Review comprehensive statistics after test completion
-5. **Toggle Graph Data**: Use buttons to show/hide different metrics on the graph
+2. **Configure Data Collection**: Adjust measurement interval (1-5 seconds) based on your needs
+3. **Start Test**: Click "Start Speed Test" to begin monitoring
+4. **View Real-time Data**: Watch live speed metrics and graph updates
+5. **Export Data**: CSV files are automatically generated and downloaded during tests
+6. **Analyze Results**: Review comprehensive statistics after test completion
+7. **Toggle Graph Data**: Use buttons to show/hide different metrics on the graph
 
 ## 🔧 Technical Implementation
 
@@ -201,6 +211,11 @@ class SpeedTest {
   async measureUploadSpeed()
   async measurePing()
 
+  // Data export and configuration
+  generateCSV()
+  downloadCSV()
+  updateMeasurementInterval()
+
   // Visualization
   updateGraph()
   updateUI()
@@ -246,7 +261,7 @@ class SpeedTest {
 
 - **Historical Data**: Save and compare test results over time
 - **Geolocation**: Test from multiple geographic regions
-- **Export Options**: Download results as CSV or PDF
+- **Advanced Export Options**: Enhanced CSV formatting and PDF reports
 - **Advanced Analytics**: More detailed network analysis
 - **PWA Support**: Offline capability and app-like experience
 
