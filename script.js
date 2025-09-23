@@ -28,7 +28,7 @@ class SpeedTest {
 
     // Wake lock management
     this.wakeLock = null;
-    this.wakeLockSupported = 'wakeLock' in navigator;
+    this.wakeLockSupported = "wakeLock" in navigator;
 
     // Interval references for cleanup
     this.measurementInterval = null;
@@ -234,14 +234,16 @@ class SpeedTest {
       // Disable the checkbox and show unsupported message
       if (this.domElements.stayAwake) {
         this.domElements.stayAwake.disabled = true;
-        this.domElements.stayAwake.title = 'Wake Lock API not supported in this browser';
-        this.updateStayAwakeStatus('Not supported', 'error');
+        this.domElements.stayAwake.title =
+          "Wake Lock API not supported in this browser";
+        this.updateStayAwakeStatus("Not supported", "error");
       }
     } else {
       // Enable the checkbox for supported browsers
       if (this.domElements.stayAwake) {
         this.domElements.stayAwake.disabled = false;
-        this.domElements.stayAwake.title = 'Keep your device awake during long speed tests';
+        this.domElements.stayAwake.title =
+          "Keep your device awake during long speed tests";
       }
     }
   }
@@ -298,14 +300,16 @@ class SpeedTest {
     this.updateUIForTestType();
 
     // Handle page visibility changes for wake lock
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden' && this.wakeLock) {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && this.wakeLock) {
         // Wake lock will be automatically released when page becomes hidden
         // We'll handle re-requesting it when page becomes visible again
-      } else if (document.visibilityState === 'visible' && 
-                 this.domElements.stayAwake.checked && 
-                 this.isRunning && 
-                 !this.wakeLock) {
+      } else if (
+        document.visibilityState === "visible" &&
+        this.domElements.stayAwake.checked &&
+        this.isRunning &&
+        !this.wakeLock
+      ) {
         // Re-request wake lock if it was previously enabled and test is running
         this.requestWakeLock();
       }
@@ -338,56 +342,62 @@ class SpeedTest {
    * Initialize theme based on localStorage or system preference
    */
   initializeTheme() {
-    const savedTheme = localStorage.getItem('speed-test-theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    let theme = 'auto';
+    const savedTheme = localStorage.getItem("speed-test-theme");
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    let theme = "auto";
     if (savedTheme) {
       theme = savedTheme;
     }
-    
+
     this.applyTheme(theme, systemPrefersDark);
     this.updateThemeToggleIcon(theme, systemPrefersDark);
-    
+
     // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      const currentTheme = localStorage.getItem('speed-test-theme') || 'auto';
-      if (currentTheme === 'auto') {
-        this.applyTheme('auto', e.matches);
-        this.updateThemeToggleIcon('auto', e.matches);
-      }
-    });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        const currentTheme = localStorage.getItem("speed-test-theme") || "auto";
+        if (currentTheme === "auto") {
+          this.applyTheme("auto", e.matches);
+          this.updateThemeToggleIcon("auto", e.matches);
+        }
+      });
   }
 
   /**
    * Toggle between light, dark, and auto themes
    */
   toggleTheme() {
-    const currentTheme = localStorage.getItem('speed-test-theme') || 'auto';
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
+    const currentTheme = localStorage.getItem("speed-test-theme") || "auto";
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
     let newTheme;
     switch (currentTheme) {
-      case 'light':
-        newTheme = 'dark';
+      case "light":
+        newTheme = "dark";
         break;
-      case 'dark':
-        newTheme = 'auto';
+      case "dark":
+        newTheme = "auto";
         break;
       default: // 'auto'
-        newTheme = 'light';
+        newTheme = "light";
         break;
     }
-    
-    localStorage.setItem('speed-test-theme', newTheme);
+
+    localStorage.setItem("speed-test-theme", newTheme);
     this.applyTheme(newTheme, systemPrefersDark);
     this.updateThemeToggleIcon(newTheme, systemPrefersDark);
-    
+
     // Add animation class
     if (this.domElements.themeToggle) {
-      this.domElements.themeToggle.classList.add('animating');
+      this.domElements.themeToggle.classList.add("animating");
       setTimeout(() => {
-        this.domElements.themeToggle.classList.remove('animating');
+        this.domElements.themeToggle.classList.remove("animating");
       }, 600);
     }
   }
@@ -399,17 +409,58 @@ class SpeedTest {
    */
   applyTheme(theme, systemPrefersDark) {
     const html = document.documentElement;
-    
+
     // Remove existing theme attributes
-    html.removeAttribute('data-theme');
-    
-    if (theme === 'light') {
-      html.setAttribute('data-theme', 'light');
-    } else if (theme === 'dark') {
-      html.setAttribute('data-theme', 'dark');
-    } else if (theme === 'auto') {
+    html.removeAttribute("data-theme");
+
+    if (theme === "light") {
+      html.setAttribute("data-theme", "light");
+    } else if (theme === "dark") {
+      html.setAttribute("data-theme", "dark");
+    } else if (theme === "auto") {
       // Let CSS media query handle auto mode
       // Don't set data-theme, let prefers-color-scheme take effect
+    }
+
+    // Update Safari UI chrome colors
+    this.updateSafariThemeColor(theme, systemPrefersDark);
+  }
+
+  /**
+   * Update Safari theme-color meta tags for UI chrome
+   * @param {string} theme - Current theme setting
+   * @param {boolean} systemPrefersDark - Whether system prefers dark mode
+   */
+  updateSafariThemeColor(theme, systemPrefersDark) {
+    // Determine the effective theme
+    let effectiveTheme = theme;
+    if (theme === "auto") {
+      effectiveTheme = systemPrefersDark ? "dark" : "light";
+    }
+
+    // Find or create theme-color meta tag
+    let themeColorMeta = document.querySelector(
+      'meta[name="theme-color"]:not([media])'
+    );
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement("meta");
+      themeColorMeta.setAttribute("name", "theme-color");
+      document.head.appendChild(themeColorMeta);
+    }
+
+    // Set the color based on effective theme
+    const color = effectiveTheme === "dark" ? "#000000" : "#ffffff";
+    themeColorMeta.setAttribute("content", color);
+
+    // Also update status bar style for iOS Safari
+    let statusBarMeta = document.querySelector(
+      'meta[name="apple-mobile-web-app-status-bar-style"]'
+    );
+    if (statusBarMeta) {
+      statusBarMeta.setAttribute(
+        "content",
+        effectiveTheme === "dark" ? "black-translucent" : "default"
+      );
     }
   }
 
@@ -420,30 +471,30 @@ class SpeedTest {
    */
   updateThemeToggleIcon(theme, systemPrefersDark) {
     if (!this.domElements.themeToggle) return;
-    
-    const icon = this.domElements.themeToggle.querySelector('.theme-icon');
+
+    const icon = this.domElements.themeToggle.querySelector(".theme-icon");
     if (!icon) return;
-    
+
     let iconText, title;
-    
+
     switch (theme) {
-      case 'light':
-        iconText = '☀️';
-        title = 'Switch to dark mode';
+      case "light":
+        iconText = "☀️";
+        title = "Switch to dark mode";
         break;
-      case 'dark':
-        iconText = '🌙';
-        title = 'Switch to auto mode (follows system)';
+      case "dark":
+        iconText = "🌙";
+        title = "Switch to auto mode (follows system)";
         break;
       default: // 'auto'
-        iconText = systemPrefersDark ? '🌓' : '🌗';
-        title = 'Switch to light mode (currently following system)';
+        iconText = systemPrefersDark ? "🌓" : "🌗";
+        title = "Switch to light mode (currently following system)";
         break;
     }
-    
+
     icon.textContent = iconText;
-    this.domElements.themeToggle.setAttribute('title', title);
-    this.domElements.themeToggle.setAttribute('aria-label', title);
+    this.domElements.themeToggle.setAttribute("title", title);
+    this.domElements.themeToggle.setAttribute("aria-label", title);
   }
 
   /**
@@ -452,7 +503,10 @@ class SpeedTest {
    */
   async handleStayAwakeToggle(enabled) {
     if (!this.wakeLockSupported) {
-      this.updateStayAwakeStatus('Wake Lock not supported in this browser', 'error');
+      this.updateStayAwakeStatus(
+        "Wake Lock not supported in this browser",
+        "error"
+      );
       this.domElements.stayAwake.checked = false;
       return;
     }
@@ -469,32 +523,34 @@ class SpeedTest {
    */
   async requestWakeLock() {
     try {
-      this.wakeLock = await navigator.wakeLock.request('screen');
-      this.updateStayAwakeStatus('Device will stay awake', 'success');
-      
+      this.wakeLock = await navigator.wakeLock.request("screen");
+      this.updateStayAwakeStatus("Device will stay awake", "success");
+
       // Listen for wake lock release (e.g., when tab becomes hidden)
-      this.wakeLock.addEventListener('release', () => {
+      this.wakeLock.addEventListener("release", () => {
         // Only update UI if the wake lock was released automatically (not by us)
         if (this.wakeLock) {
           this.wakeLock = null;
-          this.updateStayAwakeStatus('Wake lock automatically released', 'info');
+          this.updateStayAwakeStatus(
+            "Wake lock automatically released",
+            "info"
+          );
           this.domElements.stayAwake.checked = false;
-          
+
           // Clear the status message after a delay
           setTimeout(() => {
-            this.updateStayAwakeStatus('', '');
+            this.updateStayAwakeStatus("", "");
           }, 4000);
         }
       });
-      
     } catch (error) {
-      console.error('Failed to request wake lock:', error);
-      this.updateStayAwakeStatus('Failed to keep device awake', 'error');
+      console.error("Failed to request wake lock:", error);
+      this.updateStayAwakeStatus("Failed to keep device awake", "error");
       this.domElements.stayAwake.checked = false;
-      
+
       // Clear error message after a delay
       setTimeout(() => {
-        this.updateStayAwakeStatus('', '');
+        this.updateStayAwakeStatus("", "");
       }, 4000);
     }
   }
@@ -506,16 +562,16 @@ class SpeedTest {
     if (this.wakeLock) {
       this.wakeLock.release();
       this.wakeLock = null;
-      
+
       // Update UI to reflect that wake lock is no longer active
       if (this.domElements.stayAwake) {
         this.domElements.stayAwake.checked = false;
       }
-      this.updateStayAwakeStatus('Wake lock disabled', 'info');
-      
+      this.updateStayAwakeStatus("Wake lock disabled", "info");
+
       // Clear the status message after a short delay
       setTimeout(() => {
-        this.updateStayAwakeStatus('', '');
+        this.updateStayAwakeStatus("", "");
       }, 3000);
     }
   }
@@ -525,10 +581,10 @@ class SpeedTest {
    * @param {string} message - Status message
    * @param {string} type - Message type: 'success', 'error', 'info', or ''
    */
-  updateStayAwakeStatus(message, type = '') {
+  updateStayAwakeStatus(message, type = "") {
     const statusEl = this.domElements.stayAwakeStatus;
     if (!statusEl) return;
-    
+
     statusEl.textContent = message;
     statusEl.className = `stay-awake-status ${type}`;
   }
@@ -685,12 +741,12 @@ class SpeedTest {
     try {
       this.initializeTestRun();
       this.updateUIForTestStart();
-      
+
       // Activate wake lock if enabled
       if (this.domElements.stayAwake.checked) {
         await this.requestWakeLock();
       }
-      
+
       this.startTestIntervals();
 
       // Perform initial measurement
@@ -800,7 +856,7 @@ class SpeedTest {
     this.clearTestIntervals();
     this.updateUIForTestStop();
     this.calculateStatistics();
-    
+
     // Release wake lock when test stops
     this.releaseWakeLock();
 
@@ -1780,22 +1836,33 @@ class SpeedTest {
       if (data.length < 2) return;
 
       ctx.lineWidth = 2;
-      
+
       // Draw line segments, changing color when speed drops below threshold
       for (let i = 0; i < data.length - 1; i++) {
         // Skip null values (failed measurements)
-        if (data[i] === null || data[i] <= 0 || data[i + 1] === null || data[i + 1] <= 0) continue;
+        if (
+          data[i] === null ||
+          data[i] <= 0 ||
+          data[i + 1] === null ||
+          data[i + 1] <= 0
+        )
+          continue;
 
-        const x1 = padding + (this.graphData.timestamps[i] / maxTime) * graphWidth;
+        const x1 =
+          padding + (this.graphData.timestamps[i] / maxTime) * graphWidth;
         const y1 = padding + (1 - data[i] / maxSpeed) * graphHeight;
-        const x2 = padding + (this.graphData.timestamps[i + 1] / maxTime) * graphWidth;
+        const x2 =
+          padding + (this.graphData.timestamps[i + 1] / maxTime) * graphWidth;
         const y2 = padding + (1 - data[i + 1] / maxSpeed) * graphHeight;
 
         // Determine color based on speed values
         // Use red if either point is below the threshold
-        const useRedColor = data[i] < this.graphSettings.slowSpeedThreshold || 
-                           data[i + 1] < this.graphSettings.slowSpeedThreshold;
-        ctx.strokeStyle = useRedColor ? this.graphSettings.colors.slowSpeed : normalColor;
+        const useRedColor =
+          data[i] < this.graphSettings.slowSpeedThreshold ||
+          data[i + 1] < this.graphSettings.slowSpeedThreshold;
+        ctx.strokeStyle = useRedColor
+          ? this.graphSettings.colors.slowSpeed
+          : normalColor;
 
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -1816,7 +1883,9 @@ class SpeedTest {
 
     // Draw 10 Mbps reference line if the scale allows it
     if (maxSpeed >= this.graphSettings.slowSpeedThreshold) {
-      const referenceY = padding + (1 - this.graphSettings.slowSpeedThreshold / maxSpeed) * graphHeight;
+      const referenceY =
+        padding +
+        (1 - this.graphSettings.slowSpeedThreshold / maxSpeed) * graphHeight;
       ctx.strokeStyle = this.graphSettings.colors.reference;
       ctx.lineWidth = 1;
       ctx.setLineDash([5, 5]);
@@ -1853,8 +1922,10 @@ class SpeedTest {
     ) {
       const stats = this.calculateWarmedUpStats(this.measurementData.download);
       const warmedUpData = this.getWarmedUpData(this.measurementData.download);
-      const p98Download = this.calculate98thPercentile(this.measurementData.download);
-      
+      const p98Download = this.calculate98thPercentile(
+        this.measurementData.download
+      );
+
       if (warmedUpData.length > 0) {
         document.getElementById("avgDownload").textContent =
           stats.avg.toFixed(1) + " Mbps";
@@ -1885,8 +1956,10 @@ class SpeedTest {
     ) {
       const stats = this.calculateWarmedUpStats(this.measurementData.upload);
       const warmedUpData = this.getWarmedUpData(this.measurementData.upload);
-      const p98Upload = this.calculate98thPercentile(this.measurementData.upload);
-      
+      const p98Upload = this.calculate98thPercentile(
+        this.measurementData.upload
+      );
+
       if (warmedUpData.length > 0) {
         document.getElementById("avgUpload").textContent =
           stats.avg.toFixed(1) + " Mbps";
@@ -1932,9 +2005,11 @@ class SpeedTest {
       this.measurementData.download.length > 0 &&
       this.measurementData.upload.length > 0
     ) {
-      const warmedUpDownload = this.getWarmedUpData(this.measurementData.download);
+      const warmedUpDownload = this.getWarmedUpData(
+        this.measurementData.download
+      );
       const warmedUpUpload = this.getWarmedUpData(this.measurementData.upload);
-      
+
       if (warmedUpDownload.length > 0 && warmedUpUpload.length > 0) {
         const downloadCV = this.calculateCV(warmedUpDownload);
         const uploadCV = this.calculateCV(warmedUpUpload);
@@ -1946,7 +2021,7 @@ class SpeedTest {
     if (this.measurementData.ping.length > 0) {
       const p98Ping = this.calculate98thPercentile(this.measurementData.ping);
       const warmedUpPing = this.getWarmedUpData(this.measurementData.ping);
-      
+
       if (warmedUpPing.length > 0) {
         document.getElementById("p98Ping").textContent =
           p98Ping.toFixed(1) + " ms";
@@ -1994,11 +2069,11 @@ class SpeedTest {
     if (warmedUpData.length === 0) {
       return { avg: 0, max: 0, min: 0 };
     }
-    
+
     return {
       avg: this.calculateAverage(warmedUpData),
       max: Math.max(...warmedUpData),
-      min: Math.min(...warmedUpData)
+      min: Math.min(...warmedUpData),
     };
   }
 
@@ -2013,17 +2088,20 @@ class SpeedTest {
       // Need at least 10 data points for meaningful percentile calculation
       return this.calculateAverage(warmedUpData);
     }
-    
+
     // Sort data in ascending order
     const sortedData = [...warmedUpData].sort((a, b) => a - b);
-    
+
     // Calculate indices for 1% and 99% (excluding top and bottom 1%)
     const onePercentIndex = Math.floor(sortedData.length * 0.01);
     const ninetyNinePercentIndex = Math.ceil(sortedData.length * 0.99);
-    
+
     // Extract middle 98% of data
-    const middle98Percent = sortedData.slice(onePercentIndex, ninetyNinePercentIndex);
-    
+    const middle98Percent = sortedData.slice(
+      onePercentIndex,
+      ninetyNinePercentIndex
+    );
+
     // Return average of the middle 98%
     return this.calculateAverage(middle98Percent);
   }
@@ -2122,7 +2200,9 @@ class SpeedTest {
         avg: this.calculateAverage(this.measurementData.download).toFixed(2),
         max: Math.max(...this.measurementData.download).toFixed(2),
         min: Math.min(...this.measurementData.download).toFixed(2),
-        p98: this.calculate98thPercentile(this.measurementData.download).toFixed(2),
+        p98: this.calculate98thPercentile(
+          this.measurementData.download
+        ).toFixed(2),
       };
       csv.push(
         `# Download - Avg: ${downloadStats.avg} Mbps, Max: ${downloadStats.max} Mbps, Min: ${downloadStats.min} Mbps, 98th Percentile: ${downloadStats.p98} Mbps`
@@ -2134,7 +2214,9 @@ class SpeedTest {
         avg: this.calculateAverage(this.measurementData.upload).toFixed(2),
         max: Math.max(...this.measurementData.upload).toFixed(2),
         min: Math.min(...this.measurementData.upload).toFixed(2),
-        p98: this.calculate98thPercentile(this.measurementData.upload).toFixed(2),
+        p98: this.calculate98thPercentile(this.measurementData.upload).toFixed(
+          2
+        ),
       };
       csv.push(
         `# Upload - Avg: ${uploadStats.avg} Mbps, Max: ${uploadStats.max} Mbps, Min: ${uploadStats.min} Mbps, 98th Percentile: ${uploadStats.p98} Mbps`
