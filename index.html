@@ -202,49 +202,55 @@
         <h2 id="stats-heading">Connection Statistics</h2>
 
         <div class="stats-grid" role="list" aria-labelledby="stats-heading">
-          <div class="stat-item" role="listitem">
-            <label>Avg Download:</label>
-            <span id="avgDownload" aria-live="polite">-- Mbps</span>
+          <div class="stat-group" data-stat-group="download">
+            <div class="stat-item" data-stat="download avg" role="listitem">
+              <label>Avg Download:</label>
+              <span id="avgDownload" aria-live="polite">-- Mbps</span>
+            </div>
+            <div class="stat-item" data-stat="download max" role="listitem">
+              <label>Max Download:</label>
+              <span id="maxDownload" aria-live="polite">-- Mbps</span>
+            </div>
+            <div class="stat-item" data-stat="download min" role="listitem">
+              <label>Min Download:</label>
+              <span id="minDownload" aria-live="polite">-- Mbps</span>
+            </div>
+            <div class="stat-item" data-stat="download 98" role="listitem">
+              <label>98th %ile Download:</label>
+              <span id="p98Download" aria-live="polite">-- Mbps</span>
+            </div>
           </div>
-          <div class="stat-item" role="listitem">
-            <label>Max Download:</label>
-            <span id="maxDownload" aria-live="polite">-- Mbps</span>
+          <div class="stat-group" data-stat-group="upload">
+            <div class="stat-item" data-stat="upload avg" role="listitem">
+              <label>Avg Upload:</label>
+              <span id="avgUpload" aria-live="polite">-- Mbps</span>
+            </div>
+            <div class="stat-item" data-stat="upload max" role="listitem">
+              <label>Max Upload:</label>
+              <span id="maxUpload" aria-live="polite">-- Mbps</span>
+            </div>
+            <div class="stat-item" data-stat="upload min" role="listitem">
+              <label>Min Upload:</label>
+              <span id="minUpload" aria-live="polite">-- Mbps</span>
+            </div>
+            <div class="stat-item" data-stat="upload 98" role="listitem">
+              <label>98th %ile Upload:</label>
+              <span id="p98Upload" aria-live="polite">-- Mbps</span>
+            </div>
           </div>
-          <div class="stat-item" role="listitem">
-            <label>Min Download:</label>
-            <span id="minDownload" aria-live="polite">-- Mbps</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>Avg Upload:</label>
-            <span id="avgUpload" aria-live="polite">-- Mbps</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>Max Upload:</label>
-            <span id="maxUpload" aria-live="polite">-- Mbps</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>Min Upload:</label>
-            <span id="minUpload" aria-live="polite">-- Mbps</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>98th %ile Download:</label>
-            <span id="p98Download" aria-live="polite">-- Mbps</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>98th %ile Upload:</label>
-            <span id="p98Upload" aria-live="polite">-- Mbps</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>98th %ile Ping:</label>
-            <span id="p98Ping" aria-live="polite">-- ms</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>Consistency:</label>
-            <span id="stability" aria-live="polite">-- %</span>
-          </div>
-          <div class="stat-item" role="listitem">
-            <label>Test Duration:</label>
-            <span id="actualDuration" aria-live="polite">-- s</span>
+          <div class="stat-group" data-stat-group="meta">
+            <div class="stat-item" data-stat="meta ping 98" role="listitem">
+              <label>98th %ile Ping:</label>
+              <span id="p98Ping" aria-live="polite">-- ms</span>
+            </div>
+            <div class="stat-item" data-stat="meta consistency" role="listitem">
+              <label>Consistency:</label>
+              <span id="stability" aria-live="polite">-- %</span>
+            </div>
+            <div class="stat-item" data-stat="meta duration" role="listitem">
+              <label>Test Duration:</label>
+              <span id="actualDuration" aria-live="polite">-- s</span>
+            </div>
           </div>
         </div>
       </section>

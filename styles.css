@@ -1204,12 +1204,34 @@ main {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-md);
+    grid-template-areas: 'download upload meta';
+}
+
+.stat-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: stretch;
+}
+
+.stat-group[data-stat-group^="download"] {
+    grid-area: download;
+}
+
+.stat-group[data-stat-group^="upload"] {
+    grid-area: upload;
+}
+
+.stat-group[data-stat-group^="meta"] {
+    grid-area: meta;
 }
 
 .stat-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    column-gap: 0.5ch;
     padding: var(--space-md) var(--space-lg);
     background: var(--bg-secondary);
     border-radius: var(--radius-lg);
@@ -1296,6 +1318,10 @@ main {
     /* Single column for statistics */
     .stats-grid {
         grid-template-columns: 1fr;
+        grid-template-areas:
+            'download'
+            'upload'
+            'meta';
     }
     
     /* Reduce graph height on mobile */
