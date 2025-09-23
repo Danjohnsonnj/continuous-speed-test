@@ -139,6 +139,7 @@ class SpeedTest {
       validPingRange: { min: 5, max: 5000 }, // ms
       continuousConnections: 2, // Number of overlapping connections to maintain
       warmupMeasurements: 3, // Number of initial measurements to exclude from statistics
+      enableCSVExport: false, // CSV export disabled by default
     };
   }
 
@@ -177,6 +178,9 @@ class SpeedTest {
       // Stay awake control
       stayAwake: document.getElementById("stayAwake"),
       stayAwakeStatus: document.getElementById("stayAwakeStatus"),
+
+      // CSV export control
+      enableCSVExport: document.getElementById("enableCSVExport"),
 
       // Statistics
       stats: {
@@ -290,6 +294,13 @@ class SpeedTest {
     if (this.domElements.stayAwake) {
       this.domElements.stayAwake.addEventListener("change", (e) => {
         this.handleStayAwakeToggle(e.target.checked);
+      });
+    }
+
+    // CSV export control
+    if (this.domElements.enableCSVExport) {
+      this.domElements.enableCSVExport.addEventListener("change", (e) => {
+        this.testConfig.enableCSVExport = e.target.checked;
       });
     }
 
@@ -860,11 +871,12 @@ class SpeedTest {
     // Release wake lock when test stops
     this.releaseWakeLock();
 
-    // Export test results to CSV if we have data
+    // Export test results to CSV if enabled and we have data
     if (
-      this.measurementData.download.length > 0 ||
-      this.measurementData.upload.length > 0 ||
-      this.measurementData.ping.length > 0
+      this.testConfig.enableCSVExport &&
+      (this.measurementData.download.length > 0 ||
+        this.measurementData.upload.length > 0 ||
+        this.measurementData.ping.length > 0)
     ) {
       // Add a small delay to ensure UI updates are complete
       setTimeout(() => {

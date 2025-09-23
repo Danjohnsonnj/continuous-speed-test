@@ -21,7 +21,7 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Ping/Latency Testing**: Multi-endpoint ping measurement for accurate latency detection
 - **Real-time Graphing**: Live visualization of speed data using HTML5 Canvas
 - **Configurable Duration**: Test periods from 30 seconds to 5 minutes
-- **CSV Data Export**: Automatic export of performance data with timestamp-based filenames
+- **CSV Data Export**: Optional export of performance data with timestamp-based filenames (disabled by default)
 - **Configurable Measurement Intervals**: Adjustable data collection frequency (1-5 seconds)
 - **Wake Lock Support**: Keep device awake during long tests to prevent interruption
 
@@ -37,7 +37,7 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Interactive Graph**: Toggle different metrics on/off in real-time with color-coded performance zones
 - **Refined Statistics**: Warm-up period exclusion for accurate minimum/average calculations
 - **Comprehensive Analytics**: Detailed stats including averages, peaks, and consistency metrics
-- **Data Export**: Automatic CSV export with downloadable performance data over time
+- **Data Export**: Optional CSV export with downloadable performance data over time (disabled by default)
 - **Measurement Control**: Configurable data collection intervals with reliability guidance
 - **Device Management**: Wake lock toggle to prevent device sleep during extended monitoring sessions
 
@@ -50,7 +50,7 @@ A modern, accessible web application for testing internet connection speeds usin
 - **Smart Data Filtering**: Warm-up period exclusion prevents startup artifacts from skewing statistics
 - **Dynamic Graph Coloring**: Real-time visual alerts for speeds below performance thresholds
 - **Theme System**: Comprehensive CSS custom properties with system preference integration
-- **Data Persistence**: Automatic CSV export with comprehensive performance metrics and localStorage theme preferences
+- **Data Persistence**: Optional CSV export with comprehensive performance metrics (disabled by default) and localStorage theme preferences
 - **Measurement Flexibility**: Configurable data collection intervals (1-5 seconds) with reliability guidance
 - **Professional Statistics**: Industry-standard calculations excluding connection establishment delays
 - **Wake Lock Integration**: Automatic device sleep prevention with graceful fallback for unsupported browsers
@@ -160,12 +160,13 @@ continuous-speed-test/
 2. **Select Test Duration**: Choose from 30 seconds to 5 minutes
 3. **Configure Data Collection**: Adjust measurement interval (1-5 seconds) based on your needs
 4. **Enable Wake Lock** (Optional): Check "Keep device awake" to prevent sleep during long tests
-5. **Start Test**: Click "Start Speed Test" to begin monitoring
-6. **Monitor Performance**: Watch for red line segments indicating speeds below 10 Mbps
-7. **View Real-time Data**: Observe live speed metrics with warm-up period for accurate readings
-8. **Analyze Results**: Review refined statistics that exclude startup artifacts
-9. **Export Data**: CSV files are automatically generated and downloaded during tests
-10. **Toggle Graph Data**: Use buttons to show/hide different metrics with color-coded performance zones
+5. **Enable CSV Export** (Optional): Check "Export data to CSV" to automatically download test results
+6. **Start Test**: Click "Start Speed Test" to begin monitoring
+7. **Monitor Performance**: Watch for red line segments indicating speeds below 10 Mbps
+8. **View Real-time Data**: Observe live speed metrics with warm-up period for accurate readings
+9. **Analyze Results**: Review refined statistics that exclude startup artifacts
+10. **Export Data**: If enabled, CSV files are automatically generated and downloaded during tests
+11. **Toggle Graph Data**: Use buttons to show/hide different metrics with color-coded performance zones
 
 ## 🔧 Technical Implementation
 
