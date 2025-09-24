@@ -107,11 +107,13 @@
 
         <div class="test-settings">
           <div class="csv-export-control">
-            <input type="checkbox" id="enableCSVExport" aria-describedby="csv-export-help">
-            <label for="enableCSVExport">Export data to CSV</label>
+            <button id="exportCSVBtn" class="btn-secondary" disabled aria-describedby="csv-export-help" type="button">
+              <span class="export-icon" aria-hidden="true">📊</span>
+              Export Test Results to CSV
+            </button>
           </div>
           <span id="csv-export-help" class="visually-hidden">
-            Automatically download test results as a CSV file when the test completes.
+            Download test results as a CSV file. Available after completing a speed test.
           </span>
         </div>
       </section>

@@ -139,7 +139,6 @@ class SpeedTest {
       validPingRange: { min: 5, max: 5000 }, // ms
       continuousConnections: 2, // Number of overlapping connections to maintain
       warmupMeasurements: 3, // Number of initial measurements to exclude from statistics
-      enableCSVExport: false, // CSV export disabled by default
     };
   }
 
@@ -179,8 +178,8 @@ class SpeedTest {
       stayAwake: document.getElementById("stayAwake"),
       stayAwakeStatus: document.getElementById("stayAwakeStatus"),
 
-      // CSV export control
-      enableCSVExport: document.getElementById("enableCSVExport"),
+      // CSV export button
+      exportCSVBtn: document.getElementById("exportCSVBtn"),
 
       // Statistics
       stats: {
@@ -218,6 +217,9 @@ class SpeedTest {
     this.updateUIForTestType();
     this.initializeMeasurementInterval();
     this.initializeWakeLock();
+
+    // Initialize CSV export button as disabled
+    this.setCSVExportEnabled(false);
   }
 
   /**
@@ -297,10 +299,10 @@ class SpeedTest {
       });
     }
 
-    // CSV export control
-    if (this.domElements.enableCSVExport) {
-      this.domElements.enableCSVExport.addEventListener("change", (e) => {
-        this.testConfig.enableCSVExport = e.target.checked;
+    // CSV export button
+    if (this.domElements.exportCSVBtn) {
+      this.domElements.exportCSVBtn.addEventListener("click", () => {
+        this.downloadCSV();
       });
     }
 
@@ -780,6 +782,9 @@ class SpeedTest {
     this.startTime = Date.now();
     this.testDuration = parseInt(this.domElements.testDurationSelect.value);
 
+    // Disable CSV export button during test
+    this.setCSVExportEnabled(false);
+
     // Reset all data
     this.measurementData = {
       download: [],
@@ -871,17 +876,14 @@ class SpeedTest {
     // Release wake lock when test stops
     this.releaseWakeLock();
 
-    // Export test results to CSV if enabled and we have data
-    if (
-      this.testConfig.enableCSVExport &&
-      (this.measurementData.download.length > 0 ||
-        this.measurementData.upload.length > 0 ||
-        this.measurementData.ping.length > 0)
-    ) {
-      // Add a small delay to ensure UI updates are complete
-      setTimeout(() => {
-        this.downloadCSV();
-      }, 100);
+    // Enable CSV export button if we have data
+    const hasData =
+      this.measurementData.download.length > 0 ||
+      this.measurementData.upload.length > 0 ||
+      this.measurementData.ping.length > 0;
+
+    if (hasData) {
+      this.setCSVExportEnabled(true);
     }
   }
 
@@ -2358,6 +2360,30 @@ class SpeedTest {
    */
   hideCSVExportStatus() {
     this.domElements.csvExportStatus.style.display = "none";
+  }
+
+  /**
+   * Enable or disable the CSV export button
+   * @param {boolean} enabled - Whether to enable the button
+   */
+  setCSVExportEnabled(enabled) {
+    if (this.domElements.exportCSVBtn) {
+      this.domElements.exportCSVBtn.disabled = !enabled;
+
+      // Update button text based on state
+      const hasData =
+        this.measurementData.download.length > 0 ||
+        this.measurementData.upload.length > 0 ||
+        this.measurementData.ping.length > 0;
+
+      if (enabled && hasData) {
+        this.domElements.exportCSVBtn.innerHTML =
+          '<span class="export-icon" aria-hidden="true">📊</span>Export Test Results to CSV';
+      } else {
+        this.domElements.exportCSVBtn.innerHTML =
+          '<span class="export-icon" aria-hidden="true">📊</span>Export Test Results to CSV';
+      }
+    }
   }
 }
 

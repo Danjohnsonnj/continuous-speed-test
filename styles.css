@@ -810,66 +810,62 @@ main {
 .csv-export-control {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    justify-content: center;
     flex: 1;
     min-width: 0;
 }
 
-.csv-export-control input[type="checkbox"] {
-    position: relative;
-    width: 20px;
-    height: 20px;
-    appearance: none;
+/* Secondary button styling for CSV export */
+.btn-secondary {
     background: var(--bg-secondary);
+    color: var(--color-primary);
     border: 2px solid var(--border-primary);
-    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--font-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: 44px;
+    white-space: nowrap;
 }
 
-.csv-export-control input[type="checkbox"]:checked {
+.btn-secondary:hover:not(:disabled) {
     background: var(--color-accent);
-    border-color: var(--color-accent);
-}
-
-.csv-export-control input[type="checkbox"]:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     color: var(--bg-primary);
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.csv-export-control input[type="checkbox"]:hover {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
-.csv-export-control input[type="checkbox"]:focus {
+.btn-secondary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-secondary:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
-.csv-export-control input[type="checkbox"]:disabled {
+.btn-secondary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background: var(--bg-tertiary);
+    color: var(--color-tertiary);
     border-color: var(--border-secondary);
 }
 
-.csv-export-control input[type="checkbox"]:disabled:hover {
-    border-color: var(--border-secondary);
+.btn-secondary:disabled:hover {
+    transform: none;
     box-shadow: none;
 }
 
-.csv-export-control label {
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--color-primary);
-    cursor: pointer;
-    user-select: none;
+.btn-secondary .export-icon {
+    font-size: 16px;
 }
 
 .stay-awake-status.success {
