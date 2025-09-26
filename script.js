@@ -816,6 +816,9 @@ class SpeedTest {
     };
     this.testConfig.currentSizeIndex = 0;
 
+    // Reset connection statistics display
+    this.resetStatisticsDisplay();
+
     // Initialize continuous testing state
     this.continuousTests = {
       activeDownloads: new Set(),
@@ -2145,6 +2148,31 @@ class SpeedTest {
       arr.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / arr.length;
     const stdDev = Math.sqrt(variance);
     return (stdDev / mean) * 100;
+  }
+
+  /**
+   * Reset all statistics display fields to default values
+   * Called when starting a new test to clear previous results
+   */
+  resetStatisticsDisplay() {
+    // Reset download statistics
+    document.getElementById("avgDownload").textContent = "-- Mbps";
+    document.getElementById("maxDownload").textContent = "-- Mbps";
+    document.getElementById("minDownload").textContent = "-- Mbps";
+    document.getElementById("p98Download").textContent = "-- Mbps";
+
+    // Reset upload statistics
+    document.getElementById("avgUpload").textContent = "-- Mbps";
+    document.getElementById("maxUpload").textContent = "-- Mbps";
+    document.getElementById("minUpload").textContent = "-- Mbps";
+    document.getElementById("p98Upload").textContent = "-- Mbps";
+
+    // Reset ping statistics
+    document.getElementById("p98Ping").textContent = "-- ms";
+
+    // Reset stability and duration
+    document.getElementById("stability").textContent = "-- %";
+    document.getElementById("actualDuration").textContent = "-- s";
   }
 
   /**
