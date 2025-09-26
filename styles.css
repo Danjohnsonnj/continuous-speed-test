@@ -1180,6 +1180,77 @@ main {
     font-weight: 600;
 }
 
+/* Graph tooltip for showing data point details on hover */
+.graph-tooltip {
+    position: absolute;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    font-size: var(--text-sm);
+    color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: translate(-50%, -100%);
+    transition: opacity 0.2s ease-in-out;
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.graph-tooltip.visible {
+    opacity: 1;
+}
+
+.tooltip-content {
+    line-height: 1.4;
+}
+
+.tooltip-content .tooltip-time {
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: var(--space-xs);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tooltip-content .tooltip-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xs);
+}
+
+.tooltip-content .tooltip-metric:last-child {
+    margin-bottom: 0;
+}
+
+.tooltip-content .metric-label {
+    font-weight: 500;
+    color: var(--color-secondary);
+}
+
+.tooltip-content .metric-value {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.tooltip-content .metric-value.download {
+    color: var(--color-primary);
+}
+
+.tooltip-content .metric-value.upload {
+    color: var(--color-warning);
+}
+
+.tooltip-content .metric-value.ping {
+    color: var(--color-accent);
+}
+
 /* ============================================================================
    STATISTICS SECTION - Data Grid Layout
    ============================================================================ */

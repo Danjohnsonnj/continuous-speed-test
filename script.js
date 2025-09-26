@@ -168,6 +168,7 @@ class SpeedTest {
 
       // Graph
       canvas: document.getElementById("speedGraph"),
+      canvasTooltip: document.getElementById("speedGraphTooltip"),
       toggleDownload: document.getElementById("toggleDownload"),
       toggleUpload: document.getElementById("toggleUpload"),
 
@@ -303,6 +304,23 @@ class SpeedTest {
     if (this.domElements.exportCSVBtn) {
       this.domElements.exportCSVBtn.addEventListener("click", () => {
         this.downloadCSV();
+      });
+    }
+
+    // Canvas tooltip event listeners
+    if (this.domElements.canvas && this.domElements.canvasTooltip) {
+      this.domElements.canvas.addEventListener("mousemove", (e) => {
+        this.handleCanvasMouseMove(e);
+      });
+
+      this.domElements.canvas.addEventListener("mouseenter", () => {
+        if (this.graphData.timestamps.length > 0) {
+          this.domElements.canvasTooltip.style.display = "block";
+        }
+      });
+
+      this.domElements.canvas.addEventListener("mouseleave", () => {
+        this.hideTooltip();
       });
     }
 
@@ -2383,6 +2401,125 @@ class SpeedTest {
         this.domElements.exportCSVBtn.innerHTML =
           '<span class="export-icon" aria-hidden="true">📊</span>Export Test Results to CSV';
       }
+    }
+  }
+
+  /**
+   * Handle mouse movement over the canvas to show tooltip
+   * @param {MouseEvent} event - The mouse event
+   */
+  handleCanvasMouseMove(event) {
+    if (this.graphData.timestamps.length === 0) {
+      this.hideTooltip();
+      return;
+    }
+
+    const canvas = this.domElements.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    // Calculate graph dimensions (matching drawGraph method)
+    const padding = 50;
+    const graphWidth = rect.width - padding - 20;
+    const graphHeight = rect.height - padding - 30;
+
+    // Check if mouse is within the graph area
+    if (mouseX < padding || mouseX > rect.width - 20 || mouseY < padding || mouseY > rect.height - 30) {
+      this.hideTooltip();
+      return;
+    }
+
+    // Calculate the closest data point based on mouse X position
+    const maxTime = Math.max(...this.graphData.timestamps);
+    const mouseTime = ((mouseX - padding) / graphWidth) * maxTime;
+    
+    // Find the closest data point
+    let closestIndex = 0;
+    let minDistance = Math.abs(this.graphData.timestamps[0] - mouseTime);
+    
+    for (let i = 1; i < this.graphData.timestamps.length; i++) {
+      const distance = Math.abs(this.graphData.timestamps[i] - mouseTime);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = i;
+      }
+    }
+
+    // Show tooltip with data for the closest point
+    this.showTooltip(event.clientX, event.clientY, closestIndex);
+  }
+
+  /**
+   * Show tooltip with data for the specified data point
+   * @param {number} mouseX - Mouse X coordinate (page relative)
+   * @param {number} mouseY - Mouse Y coordinate (page relative) 
+   * @param {number} dataIndex - Index of the data point to show
+   */
+  showTooltip(mouseX, mouseY, dataIndex) {
+    const tooltip = this.domElements.canvasTooltip;
+    const testType = this.domElements.testTypeSelect.value;
+    
+    if (!tooltip || dataIndex >= this.graphData.timestamps.length) {
+      return;
+    }
+
+    // Get data for this point
+    const timestamp = this.graphData.timestamps[dataIndex];
+    const downloadSpeed = this.graphData.download[dataIndex];
+    const uploadSpeed = this.graphData.upload[dataIndex];
+    const pingValue = this.measurementData.ping[dataIndex]; // Get ping from raw data
+
+    // Format tooltip content based on test type
+    let content = `<div class="tooltip-time">${timestamp.toFixed(1)}s elapsed</div>`;
+    
+    // Show download speed if test includes downloads and data exists
+    if ((testType === "download" || testType === "both") && downloadSpeed !== null && downloadSpeed > 0) {
+      content += `<div class="tooltip-metric">
+        <span class="metric-label">Download:</span>
+        <span class="metric-value download">${downloadSpeed.toFixed(1)} Mbps</span>
+      </div>`;
+    }
+    
+    // Show upload speed if test includes uploads and data exists
+    if ((testType === "upload" || testType === "both") && uploadSpeed !== null && uploadSpeed > 0) {
+      content += `<div class="tooltip-metric">
+        <span class="metric-label">Upload:</span>
+        <span class="metric-value upload">${uploadSpeed.toFixed(1)} Mbps</span>
+      </div>`;
+    }
+    
+    // Show ping if data exists
+    if (pingValue !== null && pingValue > 0) {
+      content += `<div class="tooltip-metric">
+        <span class="metric-label">Ping:</span>
+        <span class="metric-value ping">${pingValue.toFixed(0)} ms</span>
+      </div>`;
+    }
+
+    // Update tooltip content and position
+    tooltip.querySelector('.tooltip-content').innerHTML = content;
+    
+    // Position tooltip relative to the canvas container
+    const canvasRect = this.domElements.canvas.getBoundingClientRect();
+    const containerRect = this.domElements.canvas.parentElement.getBoundingClientRect();
+    
+    // Calculate position relative to container
+    const relativeX = mouseX - containerRect.left;
+    const relativeY = mouseY - containerRect.top;
+    
+    tooltip.style.left = relativeX + 'px';
+    tooltip.style.top = (relativeY - 10) + 'px'; // 10px above cursor
+    tooltip.classList.add('visible');
+  }
+
+  /**
+   * Hide the tooltip
+   */
+  hideTooltip() {
+    const tooltip = this.domElements.canvasTooltip;
+    if (tooltip) {
+      tooltip.classList.remove('visible');
     }
   }
 }
