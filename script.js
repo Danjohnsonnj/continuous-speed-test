@@ -739,17 +739,28 @@ class SpeedTest {
       return;
     }
 
+    // Get the container dimensions to size canvas appropriately
+    const container = canvas.parentElement;
+    const containerRect = container.getBoundingClientRect();
+    const containerPadding = 48; // Account for container padding (--space-xl * 2)
+    
+    // Calculate available dimensions
+    const availableWidth = containerRect.width - containerPadding;
+    const desiredHeight = 400; // Keep consistent height
+    
     // Configure canvas for high-DPI displays
-    const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    // Set actual canvas dimensions (including DPR scaling)
+    canvas.width = availableWidth * dpr;
+    canvas.height = desiredHeight * dpr;
+    
+    // Set display size (CSS pixels)
+    canvas.style.width = availableWidth + "px";
+    canvas.style.height = desiredHeight + "px";
+    
+    // Scale context for high-DPI displays
     ctx.scale(dpr, dpr);
-
-    // Set display size
-    canvas.style.width = rect.width + "px";
-    canvas.style.height = rect.height + "px";
 
     this.drawGraph();
   }
@@ -2578,9 +2589,14 @@ document.addEventListener("DOMContentLoaded", () => {
   window.speedTest = new SpeedTest();
 });
 
-// Handle window resize for graph
+// Handle window resize for graph with debouncing
+let resizeTimeout;
 window.addEventListener("resize", () => {
   if (window.speedTest) {
-    window.speedTest.initializeGraph();
+    // Debounce resize events to prevent excessive redraws
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      window.speedTest.initializeGraph();
+    }, 100);
   }
 });
