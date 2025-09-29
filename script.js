@@ -2205,6 +2205,7 @@ class SpeedTest {
     // Add column headers
     const headers = [
       "Timestamp",
+      "Local_Time",
       "Relative_Time_Seconds",
       "Download_Mbps",
       "Upload_Mbps",
@@ -2246,8 +2247,18 @@ class SpeedTest {
       const timestampFormatted = absoluteTimestamp
         ? new Date(absoluteTimestamp).toISOString()
         : "";
+      
+      // Format local time for CSV
+      const localTimeFormatted = absoluteTimestamp
+        ? new Date(absoluteTimestamp).toLocaleTimeString(undefined, {
+            hour: '2-digit',
+            minute: '2-digit', 
+            second: '2-digit',
+            hour12: true
+          })
+        : "";
 
-      const row = [timestampFormatted, relativeTime, download, upload, ping];
+      const row = [timestampFormatted, localTimeFormatted, relativeTime, download, upload, ping];
       csv.push(row.join(","));
     }
 
@@ -2498,8 +2509,18 @@ class SpeedTest {
     const uploadSpeed = this.graphData.upload[dataIndex];
     const pingValue = this.measurementData.ping[dataIndex]; // Get ping from raw data
 
+    // Calculate the absolute time for this measurement
+    const absoluteTime = new Date(this.startTime + timestamp * 1000);
+    const localTimeString = absoluteTime.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+
     // Format tooltip content based on test type
     let content = `<div class="tooltip-time">${timestamp.toFixed(1)}s elapsed</div>`;
+    content += `<div class="tooltip-local-time">at ${localTimeString}</div>`;
     
     // Show download speed if test includes downloads and data exists
     if ((testType === "download" || testType === "both") && downloadSpeed !== null && downloadSpeed > 0) {
