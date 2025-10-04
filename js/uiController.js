@@ -364,6 +364,28 @@ export class UIController {
   }
 
   /**
+   * Format elapsed time in human-readable format
+   * @param {number} seconds - Elapsed time in seconds
+   * @returns {string} Formatted time string (e.g., "13s", "2m 4s", "1h 10m 15s")
+   * @private
+   */
+  formatElapsedTime(seconds) {
+    const totalSeconds = Math.floor(seconds);
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  }
+
+  /**
    * Show tooltip with data for the specified data point
    * @param {number} mouseX - Mouse X coordinate (page relative)
    * @param {number} mouseY - Mouse Y coordinate (page relative)
@@ -403,9 +425,9 @@ export class UIController {
     });
 
     // Format tooltip content based on test type
-    let content = `<div class="tooltip-time">${timestamp.toFixed(
-      1
-    )}s elapsed</div>`;
+    let content = `<div class="tooltip-time">${this.formatElapsedTime(
+      timestamp
+    )} elapsed</div>`;
     content += `<div class="tooltip-local-time">at ${localTimeString}</div>`;
 
     // Show download speed if test includes downloads and data exists
