@@ -1,19 +1,24 @@
 /**
  * Speed Test Application - Main Coordinator
- * 
+ *
  * Coordinates all modules to provide comprehensive internet speed testing.
  * Manages test lifecycle, data flow, and module interactions.
- * 
+ *
  * @module SpeedTest
  */
 
-import { UIController } from './uiController.js';
-import { GraphRenderer } from './graphRenderer.js';
-import { NetworkTester } from './networkTesting.js';
-import { StatisticsCalculator } from './statisticsCalculator.js';
-import { WakeLockManager } from './wakeLockManager.js';
-import { CSVExporter } from './csvExporter.js';
-import { CONSTANTS, GRAPH_COLORS, SERVER_ENDPOINTS, TEST_SIZES } from './constants.js';
+import { UIController } from "./uiController.js";
+import { GraphRenderer } from "./graphRenderer.js";
+import { NetworkTester } from "./networkTesting.js";
+import { StatisticsCalculator } from "./statisticsCalculator.js";
+import { WakeLockManager } from "./wakeLockManager.js";
+import { CSVExporter } from "./csvExporter.js";
+import {
+  CONSTANTS,
+  GRAPH_COLORS,
+  SERVER_ENDPOINTS,
+  TEST_SIZES,
+} from "./constants.js";
 
 export class SpeedTest {
   /**
@@ -122,17 +127,19 @@ export class SpeedTest {
    */
   initializeWakeLock() {
     const elements = this.ui.getElements();
-    
+
     if (!this.wakeLockManager.isWakeLockSupported()) {
       if (elements.stayAwake) {
         elements.stayAwake.disabled = true;
-        elements.stayAwake.title = 'Wake Lock API not supported in this browser';
-        this.updateStayAwakeStatus('Not supported', 'error');
+        elements.stayAwake.title =
+          "Wake Lock API not supported in this browser";
+        this.updateStayAwakeStatus("Not supported", "error");
       }
     } else {
       if (elements.stayAwake) {
         elements.stayAwake.disabled = false;
-        elements.stayAwake.title = 'Keep your device awake during long speed tests';
+        elements.stayAwake.title =
+          "Keep your device awake during long speed tests";
       }
     }
   }
@@ -144,72 +151,76 @@ export class SpeedTest {
     const elements = this.ui.getElements();
 
     // Main control button
-    elements.startStopBtn.addEventListener('click', () => this.toggleTest());
+    elements.startStopBtn.addEventListener("click", () => this.toggleTest());
 
     // Test configuration changes
-    elements.testTypeSelect.addEventListener('change', () => {
+    elements.testTypeSelect.addEventListener("change", () => {
       this.updateUIForTestType();
     });
 
     // Measurement interval changes
-    elements.measurementIntervalSlider.addEventListener('input', (e) => {
+    elements.measurementIntervalSlider.addEventListener("input", (e) => {
       this.updateMeasurementInterval(parseInt(e.target.value));
     });
 
     // Graph toggle controls
-    elements.toggleDownload.addEventListener('click', (e) => {
-      this.toggleGraphLine('download', e.target);
+    elements.toggleDownload.addEventListener("click", (e) => {
+      this.toggleGraphLine("download", e.target);
     });
 
-    elements.toggleUpload.addEventListener('click', (e) => {
-      this.toggleGraphLine('upload', e.target);
+    elements.toggleUpload.addEventListener("click", (e) => {
+      this.toggleGraphLine("upload", e.target);
     });
 
     // Theme toggle control
     if (elements.themeToggle) {
-      elements.themeToggle.addEventListener('click', () => {
+      elements.themeToggle.addEventListener("click", () => {
         this.ui.toggleTheme();
       });
     }
 
     // Stay awake control
     if (elements.stayAwake) {
-      elements.stayAwake.addEventListener('change', (e) => {
+      elements.stayAwake.addEventListener("change", (e) => {
         this.handleStayAwakeToggle(e.target.checked);
       });
     }
 
     // CSV export button
     if (elements.exportCSVBtn) {
-      elements.exportCSVBtn.addEventListener('click', () => {
+      elements.exportCSVBtn.addEventListener("click", () => {
         this.downloadCSV();
       });
     }
 
     // Canvas tooltip event listeners
     if (elements.canvas && elements.canvasTooltip) {
-      elements.canvas.addEventListener('mousemove', (e) => {
+      elements.canvas.addEventListener("mousemove", (e) => {
         this.handleCanvasMouseMove(e);
       });
 
-      elements.canvas.addEventListener('mouseenter', () => {
+      elements.canvas.addEventListener("mouseenter", () => {
         if (this.graphData.timestamps.length > 0) {
-          elements.canvasTooltip.style.display = 'block';
+          elements.canvasTooltip.style.display = "block";
         }
       });
 
-      elements.canvas.addEventListener('mouseleave', () => {
+      elements.canvas.addEventListener("mouseleave", () => {
         this.ui.hideTooltip();
       });
     }
 
     // Handle page visibility changes for wake lock
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener("visibilitychange", () => {
       const elements = this.ui.getElements();
-      const isVisible = document.visibilityState === 'visible';
+      const isVisible = document.visibilityState === "visible";
       const isEnabled = elements.stayAwake?.checked || false;
-      
-      this.wakeLockManager.handleVisibilityChange(isVisible, this.isRunning, isEnabled);
+
+      this.wakeLockManager.handleVisibilityChange(
+        isVisible,
+        this.isRunning,
+        isEnabled
+      );
     });
   }
 
@@ -231,7 +242,7 @@ export class SpeedTest {
     try {
       this.initializeTestRun();
       this.ui.updateStartStopButton(true);
-      this.ui.updateTestStatus('Initializing speed test...');
+      this.ui.updateTestStatus("Initializing speed test...");
 
       // Activate wake lock if enabled
       const elements = this.ui.getElements();
@@ -243,13 +254,13 @@ export class SpeedTest {
 
       // Perform initial measurement
       await this.performMeasurement();
-      this.ui.updateTestStatus('Speed test running...');
+      this.ui.updateTestStatus("Speed test running...");
 
       // Set auto-stop timer if not continuous
       this.scheduleAutoStop();
     } catch (error) {
-      console.error('Failed to start test:', error);
-      this.ui.updateTestStatus('Test started with warnings', true);
+      console.error("Failed to start test:", error);
+      this.ui.updateTestStatus("Test started with warnings", true);
     }
   }
 
@@ -343,7 +354,7 @@ export class SpeedTest {
 
     this.clearTestIntervals();
     this.ui.updateStartStopButton(false);
-    this.ui.updateTestStatus('Test completed');
+    this.ui.updateTestStatus("Test completed");
     this.ui.setProgressComplete();
 
     this.calculateStatistics();
@@ -398,7 +409,7 @@ export class SpeedTest {
       let downloadSpeed = 0;
       let uploadSpeed = 0;
 
-      if (testType === 'download' || testType === 'both') {
+      if (testType === "download" || testType === "both") {
         if (this.continuousTests.recentSpeeds.download.length > 0) {
           const recentDownloads = this.continuousTests.recentSpeeds.download;
           downloadSpeed =
@@ -410,7 +421,7 @@ export class SpeedTest {
         }
       }
 
-      if (testType === 'upload' || testType === 'both') {
+      if (testType === "upload" || testType === "both") {
         if (this.continuousTests.recentSpeeds.upload.length > 0) {
           const recentUploads = this.continuousTests.recentSpeeds.upload;
           uploadSpeed =
@@ -425,11 +436,11 @@ export class SpeedTest {
       // Update graph data
       const timestamp = (Date.now() - this.startTime) / 1000;
 
-      if (testType === 'download' || testType === 'both') {
+      if (testType === "download" || testType === "both") {
         this.graphData.download.push(downloadSpeed > 0 ? downloadSpeed : null);
       }
 
-      if (testType === 'upload' || testType === 'both') {
+      if (testType === "upload" || testType === "both") {
         this.graphData.upload.push(uploadSpeed > 0 ? uploadSpeed : null);
       }
 
@@ -444,8 +455,8 @@ export class SpeedTest {
 
       this.drawGraph();
     } catch (error) {
-      console.error('Critical measurement error:', error);
-      this.ui.updateTestStatus('Critical error during measurement', true);
+      console.error("Critical measurement error:", error);
+      this.ui.updateTestStatus("Critical error during measurement", true);
     }
   }
 
@@ -459,14 +470,14 @@ export class SpeedTest {
     const targetConnections = CONSTANTS.CONTINUOUS_CONNECTIONS;
 
     // Maintain continuous download tests
-    if (testType === 'download' || testType === 'both') {
+    if (testType === "download" || testType === "both") {
       while (this.continuousTests.activeDownloads.size < targetConnections) {
         this.startContinuousDownload();
       }
     }
 
     // Maintain continuous upload tests
-    if (testType === 'upload' || testType === 'both') {
+    if (testType === "upload" || testType === "both") {
       while (this.continuousTests.activeUploads.size < targetConnections) {
         this.startContinuousUpload();
       }
@@ -484,12 +495,15 @@ export class SpeedTest {
     this.continuousTests.activeDownloads.add(testId);
 
     try {
-      const testSize = TEST_SIZES.download[
-        Math.min(this.currentTestSize, TEST_SIZES.download.length - 1)
-      ];
+      const testSize =
+        TEST_SIZES.download[
+          Math.min(this.currentTestSize, TEST_SIZES.download.length - 1)
+        ];
 
       const startTime = performance.now();
-      const speed = await this.networkTester.testDownloadWithCloudflare(testSize);
+      const speed = await this.networkTester.testDownloadWithCloudflare(
+        testSize
+      );
       const endTime = performance.now();
 
       if (speed && speed > 0) {
@@ -515,7 +529,7 @@ export class SpeedTest {
         }
       }
     } catch (error) {
-      console.error('Continuous download test failed:', error);
+      console.error("Continuous download test failed:", error);
     } finally {
       this.continuousTests.activeDownloads.delete(testId);
     }
@@ -529,9 +543,10 @@ export class SpeedTest {
     this.continuousTests.activeUploads.add(testId);
 
     try {
-      const testSize = TEST_SIZES.upload[
-        Math.min(this.currentUploadSizeIndex, TEST_SIZES.upload.length - 1)
-      ];
+      const testSize =
+        TEST_SIZES.upload[
+          Math.min(this.currentUploadSizeIndex, TEST_SIZES.upload.length - 1)
+        ];
 
       const startTime = performance.now();
       const speed = await this.networkTester.testUploadWithHttpbin(testSize);
@@ -560,7 +575,7 @@ export class SpeedTest {
         }
       }
     } catch (error) {
-      console.error('Continuous upload test failed:', error);
+      console.error("Continuous upload test failed:", error);
     } finally {
       this.continuousTests.activeUploads.delete(testId);
     }
@@ -581,7 +596,7 @@ export class SpeedTest {
 
     // Calculate average download speed
     if (
-      (testType === 'download' || testType === 'both') &&
+      (testType === "download" || testType === "both") &&
       this.continuousTests.recentSpeeds.download.length > 0
     ) {
       const recentDownloads = this.continuousTests.recentSpeeds.download;
@@ -592,7 +607,7 @@ export class SpeedTest {
 
     // Calculate average upload speed
     if (
-      (testType === 'upload' || testType === 'both') &&
+      (testType === "upload" || testType === "both") &&
       this.continuousTests.recentSpeeds.upload.length > 0
     ) {
       const recentUploads = this.continuousTests.recentSpeeds.upload;
@@ -627,7 +642,10 @@ export class SpeedTest {
    */
   calculateStatistics() {
     const testType = this.ui.getTestType();
-    const stats = this.statsCalculator.calculateAll(this.measurementData, testType);
+    const stats = this.statsCalculator.calculateAll(
+      this.measurementData,
+      testType
+    );
 
     this.ui.updateStatistics(stats);
     this.ui.updateActualDuration(this.startTime, this.endTime);
@@ -666,13 +684,15 @@ export class SpeedTest {
    * @param {HTMLElement} buttonElement - The toggle button
    */
   toggleGraphLine(lineType, buttonElement) {
-    const settingKey = `show${lineType.charAt(0).toUpperCase() + lineType.slice(1)}`;
+    const settingKey = `show${
+      lineType.charAt(0).toUpperCase() + lineType.slice(1)
+    }`;
     this.graphSettings[settingKey] = !this.graphSettings[settingKey];
 
-    buttonElement.classList.toggle('active');
+    buttonElement.classList.toggle("active");
     buttonElement.setAttribute(
-      'aria-pressed',
-      buttonElement.classList.contains('active').toString()
+      "aria-pressed",
+      buttonElement.classList.contains("active").toString()
     );
 
     // Update graph renderer settings
@@ -686,7 +706,10 @@ export class SpeedTest {
    */
   async handleStayAwakeToggle(enabled) {
     if (!this.wakeLockManager.isWakeLockSupported()) {
-      this.updateStayAwakeStatus('Wake Lock not supported in this browser', 'error');
+      this.updateStayAwakeStatus(
+        "Wake Lock not supported in this browser",
+        "error"
+      );
       this.ui.getElements().stayAwake.checked = false;
       return;
     }
@@ -703,7 +726,7 @@ export class SpeedTest {
    * @param {string} message - Status message
    * @param {string} type - Message type
    */
-  updateStayAwakeStatus(message, type = '') {
+  updateStayAwakeStatus(message, type = "") {
     const statusEl = this.ui.getElements().stayAwakeStatus;
     if (!statusEl) return;
 
@@ -716,7 +739,7 @@ export class SpeedTest {
    */
   downloadCSV() {
     try {
-      this.ui.showCSVExportStatus('Generating CSV file...', 'loading');
+      this.ui.showCSVExportStatus("Generating CSV file...", "loading");
 
       const csvContent = this.csvExporter.generate({
         measurementData: this.measurementData,
@@ -731,10 +754,10 @@ export class SpeedTest {
       const success = this.csvExporter.download(csvContent, filename);
 
       if (success) {
-        this.ui.showCSVExportStatus('✓ CSV exported successfully!', 'success');
-        this.ui.updateTestStatus('Test completed - CSV exported');
+        this.ui.showCSVExportStatus("✓ CSV exported successfully!", "success");
+        this.ui.updateTestStatus("Test completed - CSV exported");
       } else {
-        throw new Error('Download failed');
+        throw new Error("Download failed");
       }
 
       // Hide status after delay
@@ -742,9 +765,9 @@ export class SpeedTest {
         this.ui.hideCSVExportStatus();
       }, CONSTANTS.STATUS_MESSAGE_TIMEOUT_MS);
     } catch (error) {
-      console.error('Failed to export CSV:', error);
-      this.ui.showCSVExportStatus('✗ CSV export failed', 'error');
-      this.ui.updateTestStatus('Test completed - CSV export failed', true);
+      console.error("Failed to export CSV:", error);
+      this.ui.showCSVExportStatus("✗ CSV export failed", "error");
+      this.ui.updateTestStatus("Test completed - CSV export failed", true);
 
       setTimeout(() => {
         this.ui.hideCSVExportStatus();
@@ -773,11 +796,25 @@ export class SpeedTest {
       return;
     }
 
+    // Calculate dimensions needed for finding closest point
+    const padding = CONSTANTS.GRAPH_PADDING_PX;
+    const graphWidth =
+      rect.width - padding - CONSTANTS.GRAPH_AXIS_MARGIN_RIGHT_PX;
+    const maxTime = Math.max(...this.graphData.timestamps);
+
+    const dimensions = {
+      padding,
+      graphWidth,
+      maxTime,
+      width: rect.width,
+      height: rect.height,
+    };
+
     // Find closest data point
     const closestIndex = this.graphRenderer.findClosestDataPoint(
       mouseX,
       this.graphData.timestamps,
-      { padding: CONSTANTS.GRAPH_PADDING_PX, width: rect.width, height: rect.height }
+      dimensions
     );
 
     // Show tooltip
@@ -801,13 +838,13 @@ export class SpeedTest {
 }
 
 // Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   window.speedTest = new SpeedTest();
 });
 
 // Handle window resize
 let resizeTimeout;
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   if (window.speedTest) {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
