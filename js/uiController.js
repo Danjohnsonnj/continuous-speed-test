@@ -1,13 +1,13 @@
 /**
  * UI Controller Module
- * 
+ *
  * Handles all DOM manipulation, display updates, and UI state management.
  * Provides a clean interface between the application logic and the user interface.
- * 
+ *
  * @module UIController
  */
 
-import { CONSTANTS } from './constants.js';
+import { CONSTANTS } from "./constants.js";
 
 export class UIController {
   /**
@@ -25,52 +25,52 @@ export class UIController {
   initializeDOMElements() {
     const elements = {
       // Controls
-      startStopBtn: document.getElementById('startStopBtn'),
-      testDurationSelect: document.getElementById('testDuration'),
-      testTypeSelect: document.getElementById('testType'),
-      measurementIntervalSlider: document.getElementById('measurementInterval'),
-      intervalValue: document.getElementById('intervalValue'),
+      startStopBtn: document.getElementById("startStopBtn"),
+      testDurationSelect: document.getElementById("testDuration"),
+      testTypeSelect: document.getElementById("testType"),
+      measurementIntervalSlider: document.getElementById("measurementInterval"),
+      intervalValue: document.getElementById("intervalValue"),
 
       // Speed displays
-      downloadSpeed: document.getElementById('downloadSpeed'),
-      uploadSpeed: document.getElementById('uploadSpeed'),
-      pingValue: document.getElementById('pingValue'),
+      downloadSpeed: document.getElementById("downloadSpeed"),
+      uploadSpeed: document.getElementById("uploadSpeed"),
+      pingValue: document.getElementById("pingValue"),
 
       // Status and progress
-      testStatus: document.getElementById('testStatus'),
-      testProgress: document.getElementById('testProgress'),
-      progressFill: document.getElementById('progressFill'),
-      csvExportStatus: document.getElementById('csvExportStatus'),
+      testStatus: document.getElementById("testStatus"),
+      testProgress: document.getElementById("testProgress"),
+      progressFill: document.getElementById("progressFill"),
+      csvExportStatus: document.getElementById("csvExportStatus"),
 
       // Graph
-      canvas: document.getElementById('speedGraph'),
-      canvasTooltip: document.getElementById('speedGraphTooltip'),
-      toggleDownload: document.getElementById('toggleDownload'),
-      toggleUpload: document.getElementById('toggleUpload'),
+      canvas: document.getElementById("speedGraph"),
+      canvasTooltip: document.getElementById("speedGraphTooltip"),
+      toggleDownload: document.getElementById("toggleDownload"),
+      toggleUpload: document.getElementById("toggleUpload"),
 
       // Theme toggle
-      themeToggle: document.getElementById('themeToggle'),
+      themeToggle: document.getElementById("themeToggle"),
 
       // Stay awake control
-      stayAwake: document.getElementById('stayAwake'),
-      stayAwakeStatus: document.getElementById('stayAwakeStatus'),
+      stayAwake: document.getElementById("stayAwake"),
+      stayAwakeStatus: document.getElementById("stayAwakeStatus"),
 
       // CSV export button
-      exportCSVBtn: document.getElementById('exportCSVBtn'),
+      exportCSVBtn: document.getElementById("exportCSVBtn"),
 
       // Statistics
       stats: {
-        avgDownload: document.getElementById('avgDownload'),
-        maxDownload: document.getElementById('maxDownload'),
-        minDownload: document.getElementById('minDownload'),
-        avgUpload: document.getElementById('avgUpload'),
-        maxUpload: document.getElementById('maxUpload'),
-        minUpload: document.getElementById('minUpload'),
-        p98Download: document.getElementById('p98Download'),
-        p98Upload: document.getElementById('p98Upload'),
-        p98Ping: document.getElementById('p98Ping'),
-        stability: document.getElementById('stability'),
-        actualDuration: document.getElementById('actualDuration'),
+        avgDownload: document.getElementById("avgDownload"),
+        maxDownload: document.getElementById("maxDownload"),
+        minDownload: document.getElementById("minDownload"),
+        avgUpload: document.getElementById("avgUpload"),
+        maxUpload: document.getElementById("maxUpload"),
+        minUpload: document.getElementById("minUpload"),
+        p98Download: document.getElementById("p98Download"),
+        p98Upload: document.getElementById("p98Upload"),
+        p98Ping: document.getElementById("p98Ping"),
+        stability: document.getElementById("stability"),
+        actualDuration: document.getElementById("actualDuration"),
       },
     };
 
@@ -114,9 +114,9 @@ export class UIController {
     testStatus.textContent = message;
 
     if (isError) {
-      testStatus.classList.add('error');
+      testStatus.classList.add("error");
     } else {
-      testStatus.classList.remove('error');
+      testStatus.classList.remove("error");
     }
   }
 
@@ -129,15 +129,17 @@ export class UIController {
     if (total === 0) return; // Continuous mode
 
     const progress = Math.min(100, (elapsed / total) * 100);
-    this.domElements.progressFill.style.width = progress + '%';
-    this.domElements.testProgress.textContent = `${elapsed.toFixed(0)}s / ${total}s`;
+    this.domElements.progressFill.style.width = progress + "%";
+    this.domElements.testProgress.textContent = `${elapsed.toFixed(
+      0
+    )}s / ${total}s`;
   }
 
   /**
    * Set progress to 100% (test complete)
    */
   setProgressComplete() {
-    this.domElements.progressFill.style.width = '100%';
+    this.domElements.progressFill.style.width = "100%";
   }
 
   /**
@@ -147,13 +149,13 @@ export class UIController {
   updateStartStopButton(isRunning) {
     const btn = this.domElements.startStopBtn;
     if (isRunning) {
-      btn.textContent = 'Stop Test';
-      btn.classList.add('stop');
-      btn.setAttribute('aria-label', 'Stop the speed test');
+      btn.textContent = "Stop Test";
+      btn.classList.add("stop");
+      btn.setAttribute("aria-label", "Stop the speed test");
     } else {
-      btn.textContent = 'Start Test';
-      btn.classList.remove('stop');
-      btn.setAttribute('aria-label', 'Start the speed test');
+      btn.textContent = "Start Test";
+      btn.classList.remove("stop");
+      btn.setAttribute("aria-label", "Start the speed test");
     }
   }
 
@@ -195,16 +197,16 @@ export class UIController {
    * @param {string} testType - 'download', 'upload', or 'both'
    */
   updateSpeedCardVisibility(testType) {
-    const downloadCard = document.querySelector('.speed-card.download');
-    const uploadCard = document.querySelector('.speed-card.upload');
+    const downloadCard = document.querySelector(".speed-card.download");
+    const uploadCard = document.querySelector(".speed-card.upload");
 
     const visibility = {
-      download: testType === 'download' || testType === 'both',
-      upload: testType === 'upload' || testType === 'both',
+      download: testType === "download" || testType === "both",
+      upload: testType === "upload" || testType === "both",
     };
 
-    downloadCard.style.display = visibility.download ? 'block' : 'none';
-    uploadCard.style.display = visibility.upload ? 'block' : 'none';
+    downloadCard.style.display = visibility.download ? "block" : "none";
+    uploadCard.style.display = visibility.upload ? "block" : "none";
   }
 
   /**
@@ -214,15 +216,15 @@ export class UIController {
   updateGraphToggleVisibility(testType) {
     const { toggleDownload, toggleUpload } = this.domElements;
 
-    if (testType === 'download') {
-      toggleDownload.style.display = 'inline-block';
-      toggleUpload.style.display = 'none';
-    } else if (testType === 'upload') {
-      toggleDownload.style.display = 'none';
-      toggleUpload.style.display = 'inline-block';
+    if (testType === "download") {
+      toggleDownload.style.display = "inline-block";
+      toggleUpload.style.display = "none";
+    } else if (testType === "upload") {
+      toggleDownload.style.display = "none";
+      toggleUpload.style.display = "inline-block";
     } else {
-      toggleDownload.style.display = 'inline-block';
-      toggleUpload.style.display = 'inline-block';
+      toggleDownload.style.display = "inline-block";
+      toggleUpload.style.display = "inline-block";
     }
   }
 
@@ -235,18 +237,34 @@ export class UIController {
 
     // Download statistics
     if (stats.download) {
-      statElements.avgDownload.textContent = `${stats.download.avg.toFixed(1)} Mbps`;
-      statElements.maxDownload.textContent = `${stats.download.max.toFixed(1)} Mbps`;
-      statElements.minDownload.textContent = `${stats.download.min.toFixed(1)} Mbps`;
-      statElements.p98Download.textContent = `${stats.download.p98.toFixed(1)} Mbps`;
+      statElements.avgDownload.textContent = `${stats.download.avg.toFixed(
+        1
+      )} Mbps`;
+      statElements.maxDownload.textContent = `${stats.download.max.toFixed(
+        1
+      )} Mbps`;
+      statElements.minDownload.textContent = `${stats.download.min.toFixed(
+        1
+      )} Mbps`;
+      statElements.p98Download.textContent = `${stats.download.p98.toFixed(
+        1
+      )} Mbps`;
     }
 
     // Upload statistics
     if (stats.upload) {
-      statElements.avgUpload.textContent = `${stats.upload.avg.toFixed(1)} Mbps`;
-      statElements.maxUpload.textContent = `${stats.upload.max.toFixed(1)} Mbps`;
-      statElements.minUpload.textContent = `${stats.upload.min.toFixed(1)} Mbps`;
-      statElements.p98Upload.textContent = `${stats.upload.p98.toFixed(1)} Mbps`;
+      statElements.avgUpload.textContent = `${stats.upload.avg.toFixed(
+        1
+      )} Mbps`;
+      statElements.maxUpload.textContent = `${stats.upload.max.toFixed(
+        1
+      )} Mbps`;
+      statElements.minUpload.textContent = `${stats.upload.min.toFixed(
+        1
+      )} Mbps`;
+      statElements.p98Upload.textContent = `${stats.upload.p98.toFixed(
+        1
+      )} Mbps`;
     }
 
     // Ping statistics
@@ -275,25 +293,25 @@ export class UIController {
    */
   resetStatisticsDisplay() {
     const { stats } = this.domElements;
-    
+
     // Reset download statistics
-    stats.avgDownload.textContent = '-- Mbps';
-    stats.maxDownload.textContent = '-- Mbps';
-    stats.minDownload.textContent = '-- Mbps';
-    stats.p98Download.textContent = '-- Mbps';
+    stats.avgDownload.textContent = "-- Mbps";
+    stats.maxDownload.textContent = "-- Mbps";
+    stats.minDownload.textContent = "-- Mbps";
+    stats.p98Download.textContent = "-- Mbps";
 
     // Reset upload statistics
-    stats.avgUpload.textContent = '-- Mbps';
-    stats.maxUpload.textContent = '-- Mbps';
-    stats.minUpload.textContent = '-- Mbps';
-    stats.p98Upload.textContent = '-- Mbps';
+    stats.avgUpload.textContent = "-- Mbps";
+    stats.maxUpload.textContent = "-- Mbps";
+    stats.minUpload.textContent = "-- Mbps";
+    stats.p98Upload.textContent = "-- Mbps";
 
     // Reset ping statistics
-    stats.p98Ping.textContent = '-- ms';
+    stats.p98Ping.textContent = "-- ms";
 
     // Reset stability and duration
-    stats.stability.textContent = '-- %';
-    stats.actualDuration.textContent = '-- s';
+    stats.stability.textContent = "-- %";
+    stats.actualDuration.textContent = "-- s";
   }
 
   /**
@@ -307,17 +325,33 @@ export class UIController {
   }
 
   /**
+   * Enable or disable the test configuration controls
+   * @param {boolean} enabled - Whether to enable the controls
+   */
+  setConfigurationControlsEnabled(enabled) {
+    if (this.domElements.testTypeSelect) {
+      this.domElements.testTypeSelect.disabled = !enabled;
+    }
+    if (this.domElements.testDurationSelect) {
+      this.domElements.testDurationSelect.disabled = !enabled;
+    }
+    if (this.domElements.measurementIntervalSlider) {
+      this.domElements.measurementIntervalSlider.disabled = !enabled;
+    }
+  }
+
+  /**
    * Show CSV export status message
    * @param {string} message - Status message
    * @param {ExportStatusType} type - Message type ('loading', 'success', 'error')
    */
-  showCSVExportStatus(message, type = 'loading') {
+  showCSVExportStatus(message, type = "loading") {
     const statusEl = this.domElements.csvExportStatus;
     if (!statusEl) return;
 
     statusEl.textContent = message;
     statusEl.className = `csv-export-status ${type}`;
-    statusEl.style.display = 'block';
+    statusEl.style.display = "block";
   }
 
   /**
@@ -326,7 +360,7 @@ export class UIController {
   hideCSVExportStatus() {
     const statusEl = this.domElements.csvExportStatus;
     if (!statusEl) return;
-    statusEl.style.display = 'none';
+    statusEl.style.display = "none";
   }
 
   /**
@@ -338,7 +372,14 @@ export class UIController {
    * @param {MeasurementData} measurementData - Raw measurement data
    * @param {number} startTime - Test start timestamp
    */
-  showTooltip(mouseX, mouseY, dataIndex, graphData, measurementData, startTime) {
+  showTooltip(
+    mouseX,
+    mouseY,
+    dataIndex,
+    graphData,
+    measurementData,
+    startTime
+  ) {
     const tooltip = this.domElements.canvasTooltip;
     const testType = this.getTestType();
 
@@ -355,26 +396,38 @@ export class UIController {
     // Calculate the absolute time for this measurement
     const absoluteTime = new Date(startTime + timestamp * 1000);
     const localTimeString = absoluteTime.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
     });
 
     // Format tooltip content based on test type
-    let content = `<div class="tooltip-time">${timestamp.toFixed(1)}s elapsed</div>`;
+    let content = `<div class="tooltip-time">${timestamp.toFixed(
+      1
+    )}s elapsed</div>`;
     content += `<div class="tooltip-local-time">at ${localTimeString}</div>`;
 
     // Show download speed if test includes downloads and data exists
-    if ((testType === 'download' || testType === 'both') && downloadSpeed !== null && downloadSpeed > 0) {
+    if (
+      (testType === "download" || testType === "both") &&
+      downloadSpeed !== null &&
+      downloadSpeed > 0
+    ) {
       content += `<div class="tooltip-metric">
         <span class="metric-label">Download:</span>
-        <span class="metric-value download">${downloadSpeed.toFixed(1)} Mbps</span>
+        <span class="metric-value download">${downloadSpeed.toFixed(
+          1
+        )} Mbps</span>
       </div>`;
     }
 
     // Show upload speed if test includes uploads and data exists
-    if ((testType === 'upload' || testType === 'both') && uploadSpeed !== null && uploadSpeed > 0) {
+    if (
+      (testType === "upload" || testType === "both") &&
+      uploadSpeed !== null &&
+      uploadSpeed > 0
+    ) {
       content += `<div class="tooltip-metric">
         <span class="metric-label">Upload:</span>
         <span class="metric-value upload">${uploadSpeed.toFixed(1)} Mbps</span>
@@ -390,19 +443,20 @@ export class UIController {
     }
 
     // Update tooltip content and position
-    tooltip.querySelector('.tooltip-content').innerHTML = content;
+    tooltip.querySelector(".tooltip-content").innerHTML = content;
 
     // Position tooltip relative to the canvas container
     const canvasRect = this.domElements.canvas.getBoundingClientRect();
-    const containerRect = this.domElements.canvas.parentElement.getBoundingClientRect();
+    const containerRect =
+      this.domElements.canvas.parentElement.getBoundingClientRect();
 
     // Calculate position relative to container
     const relativeX = mouseX - containerRect.left;
     const relativeY = mouseY - containerRect.top;
 
-    tooltip.style.left = relativeX + 'px';
-    tooltip.style.top = (relativeY - 10) + 'px'; // 10px above cursor
-    tooltip.classList.add('visible');
+    tooltip.style.left = relativeX + "px";
+    tooltip.style.top = relativeY - 10 + "px"; // 10px above cursor
+    tooltip.classList.add("visible");
   }
 
   /**
@@ -411,7 +465,7 @@ export class UIController {
   hideTooltip() {
     const tooltip = this.domElements.canvasTooltip;
     if (tooltip) {
-      tooltip.classList.remove('visible');
+      tooltip.classList.remove("visible");
     }
   }
 
@@ -419,10 +473,12 @@ export class UIController {
    * Initialize theme based on localStorage or system preference
    */
   initializeTheme() {
-    const savedTheme = localStorage.getItem('speed-test-theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem("speed-test-theme");
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
 
-    let theme = 'auto';
+    let theme = "auto";
     if (savedTheme) {
       theme = savedTheme;
     }
@@ -431,44 +487,48 @@ export class UIController {
     this.updateThemeToggleIcon(theme, systemPrefersDark);
 
     // Listen for system theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      const currentTheme = localStorage.getItem('speed-test-theme') || 'auto';
-      if (currentTheme === 'auto') {
-        this.applyTheme('auto', e.matches);
-        this.updateThemeToggleIcon('auto', e.matches);
-      }
-    });
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        const currentTheme = localStorage.getItem("speed-test-theme") || "auto";
+        if (currentTheme === "auto") {
+          this.applyTheme("auto", e.matches);
+          this.updateThemeToggleIcon("auto", e.matches);
+        }
+      });
   }
 
   /**
    * Toggle between light, dark, and auto themes
    */
   toggleTheme() {
-    const currentTheme = localStorage.getItem('speed-test-theme') || 'auto';
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = localStorage.getItem("speed-test-theme") || "auto";
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
 
     let newTheme;
     switch (currentTheme) {
-      case 'light':
-        newTheme = 'dark';
+      case "light":
+        newTheme = "dark";
         break;
-      case 'dark':
-        newTheme = 'auto';
+      case "dark":
+        newTheme = "auto";
         break;
       default: // 'auto'
-        newTheme = 'light';
+        newTheme = "light";
         break;
     }
 
-    localStorage.setItem('speed-test-theme', newTheme);
+    localStorage.setItem("speed-test-theme", newTheme);
     this.applyTheme(newTheme, systemPrefersDark);
     this.updateThemeToggleIcon(newTheme, systemPrefersDark);
 
     // Add animation class
     if (this.domElements.themeToggle) {
-      this.domElements.themeToggle.classList.add('animating');
+      this.domElements.themeToggle.classList.add("animating");
       setTimeout(() => {
-        this.domElements.themeToggle.classList.remove('animating');
+        this.domElements.themeToggle.classList.remove("animating");
       }, 600);
     }
   }
@@ -483,13 +543,13 @@ export class UIController {
     const html = document.documentElement;
 
     // Remove existing theme attributes
-    html.removeAttribute('data-theme');
+    html.removeAttribute("data-theme");
 
-    if (theme === 'light') {
-      html.setAttribute('data-theme', 'light');
-    } else if (theme === 'dark') {
-      html.setAttribute('data-theme', 'dark');
-    } else if (theme === 'auto') {
+    if (theme === "light") {
+      html.setAttribute("data-theme", "light");
+    } else if (theme === "dark") {
+      html.setAttribute("data-theme", "dark");
+    } else if (theme === "auto") {
       // Let CSS media query handle auto mode
       // Don't set data-theme, let prefers-color-scheme take effect
     }
@@ -507,26 +567,33 @@ export class UIController {
   updateSafariThemeColor(theme, systemPrefersDark) {
     // Determine the effective theme
     let effectiveTheme = theme;
-    if (theme === 'auto') {
-      effectiveTheme = systemPrefersDark ? 'dark' : 'light';
+    if (theme === "auto") {
+      effectiveTheme = systemPrefersDark ? "dark" : "light";
     }
 
     // Find or create theme-color meta tag
-    let themeColorMeta = document.querySelector('meta[name="theme-color"]:not([media])');
+    let themeColorMeta = document.querySelector(
+      'meta[name="theme-color"]:not([media])'
+    );
     if (!themeColorMeta) {
-      themeColorMeta = document.createElement('meta');
-      themeColorMeta.setAttribute('name', 'theme-color');
+      themeColorMeta = document.createElement("meta");
+      themeColorMeta.setAttribute("name", "theme-color");
       document.head.appendChild(themeColorMeta);
     }
 
     // Set the color based on effective theme
-    const color = effectiveTheme === 'dark' ? '#000000' : '#ffffff';
-    themeColorMeta.setAttribute('content', color);
+    const color = effectiveTheme === "dark" ? "#000000" : "#ffffff";
+    themeColorMeta.setAttribute("content", color);
 
     // Also update status bar style for iOS Safari
-    let statusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    let statusBarMeta = document.querySelector(
+      'meta[name="apple-mobile-web-app-status-bar-style"]'
+    );
     if (statusBarMeta) {
-      statusBarMeta.setAttribute('content', effectiveTheme === 'dark' ? 'black-translucent' : 'default');
+      statusBarMeta.setAttribute(
+        "content",
+        effectiveTheme === "dark" ? "black-translucent" : "default"
+      );
     }
   }
 
@@ -539,28 +606,28 @@ export class UIController {
   updateThemeToggleIcon(theme, systemPrefersDark) {
     if (!this.domElements.themeToggle) return;
 
-    const icon = this.domElements.themeToggle.querySelector('.theme-icon');
+    const icon = this.domElements.themeToggle.querySelector(".theme-icon");
     if (!icon) return;
 
     let iconText, title;
 
     switch (theme) {
-      case 'light':
-        iconText = '☀️';
-        title = 'Switch to dark mode';
+      case "light":
+        iconText = "☀️";
+        title = "Switch to dark mode";
         break;
-      case 'dark':
-        iconText = '🌙';
-        title = 'Switch to auto mode (follows system)';
+      case "dark":
+        iconText = "🌙";
+        title = "Switch to auto mode (follows system)";
         break;
       default: // 'auto'
-        iconText = systemPrefersDark ? '🌓' : '🌗';
-        title = 'Switch to light mode (currently following system)';
+        iconText = systemPrefersDark ? "🌓" : "🌗";
+        title = "Switch to light mode (currently following system)";
         break;
     }
 
     icon.textContent = iconText;
-    this.domElements.themeToggle.setAttribute('title', title);
-    this.domElements.themeToggle.setAttribute('aria-label', title);
+    this.domElements.themeToggle.setAttribute("title", title);
+    this.domElements.themeToggle.setAttribute("aria-label", title);
   }
 }

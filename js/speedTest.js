@@ -242,6 +242,7 @@ export class SpeedTest {
     try {
       this.initializeTestRun();
       this.ui.updateStartStopButton(true);
+      this.ui.setConfigurationControlsEnabled(false);
       this.ui.updateTestStatus("Initializing speed test...");
 
       // Activate wake lock if enabled
@@ -354,6 +355,7 @@ export class SpeedTest {
 
     this.clearTestIntervals();
     this.ui.updateStartStopButton(false);
+    this.ui.setConfigurationControlsEnabled(true);
     this.ui.updateTestStatus("Test completed");
     this.ui.setProgressComplete();
 

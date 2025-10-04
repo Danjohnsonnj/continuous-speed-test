@@ -646,6 +646,19 @@ main {
     border-color: var(--color-accent);
 }
 
+.test-settings select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-tertiary);
+    color: var(--color-tertiary);
+    border-color: var(--border-secondary);
+}
+
+.test-settings select:disabled:hover {
+    border-color: var(--border-secondary);
+    box-shadow: none;
+}
+
 /* Interval control styling - Modern slider */
 .interval-control {
     display: flex;
@@ -721,6 +734,34 @@ main {
 .interval-control input[type="range"]:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
+}
+
+.interval-control input[type="range"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--border-secondary);
+}
+
+.interval-control input[type="range"]:disabled::-webkit-slider-thumb {
+    cursor: not-allowed;
+    background: var(--color-tertiary);
+    border-color: var(--border-secondary);
+}
+
+.interval-control input[type="range"]:disabled::-webkit-slider-thumb:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.interval-control input[type="range"]:disabled::-moz-range-thumb {
+    cursor: not-allowed;
+    background: var(--color-tertiary);
+    border-color: var(--border-secondary);
+}
+
+.interval-control input[type="range"]:disabled::-moz-range-thumb:hover {
+    transform: none;
+    box-shadow: none;
 }
 
 .interval-value {
