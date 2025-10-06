@@ -109,7 +109,7 @@
           <div class="csv-export-control">
             <button id="exportCSVBtn" class="btn-secondary" disabled aria-describedby="csv-export-help" type="button">
               <span class="export-icon" aria-hidden="true">📊</span>
-              Export Test Results to CSV
+              Export Results
             </button>
           </div>
           <span id="csv-export-help" class="visually-hidden">
@@ -123,27 +123,25 @@
         <h2 id="speed-heading" class="visually-hidden">Current Speed Measurements</h2>
 
         <div class="speed-card download" role="img" aria-labelledby="download-label">
-          <div class="speed-icon" aria-hidden="true">↓</div>
+
           <div class="speed-info">
-            <h3 id="download-label">Download</h3>
+            <h3 id="download-label"><span class="speed-icon" aria-hidden="true">↓</span> Download</h3>
             <div class="speed-value" id="downloadSpeed" aria-live="polite">--</div>
             <div class="speed-unit">Mbps</div>
           </div>
         </div>
 
         <div class="speed-card upload" role="img" aria-labelledby="upload-label">
-          <div class="speed-icon" aria-hidden="true">↑</div>
           <div class="speed-info">
-            <h3 id="upload-label">Upload</h3>
+            <h3 id="upload-label"><span class="speed-icon" aria-hidden="true">↑</span> Upload</h3>
             <div class="speed-value" id="uploadSpeed" aria-live="polite">--</div>
             <div class="speed-unit">Mbps</div>
           </div>
         </div>
 
         <div class="speed-card ping" role="img" aria-labelledby="ping-label">
-          <div class="speed-icon" aria-hidden="true">📡</div>
           <div class="speed-info">
-            <h3 id="ping-label">Ping</h3>
+            <h3 id="ping-label"><span class="speed-icon" aria-hidden="true">📡</span> Ping</h3>
             <div class="speed-value" id="pingValue" aria-live="polite">--</div>
             <div class="speed-unit">ms</div>
           </div>

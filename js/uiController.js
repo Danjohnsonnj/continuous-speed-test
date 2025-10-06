@@ -217,11 +217,11 @@ export class UIController {
     const { toggleDownload, toggleUpload } = this.domElements;
 
     if (testType === "download") {
-      toggleDownload.style.display = "inline-block";
+      toggleDownload.style.display = "none";
       toggleUpload.style.display = "none";
     } else if (testType === "upload") {
       toggleDownload.style.display = "none";
-      toggleUpload.style.display = "inline-block";
+      toggleUpload.style.display = "none";
     } else {
       toggleDownload.style.display = "inline-block";
       toggleUpload.style.display = "inline-block";
